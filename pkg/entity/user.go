@@ -9,8 +9,8 @@ import (
 type Email string
 
 type User struct {
-	UserId AutoGenKey
 	Email  Email
+	UserId AutoGenKey
 }
 
 func NewUser(email string) (User, error) {
@@ -32,6 +32,13 @@ func (u User) Copy(key AutoGenKey) User {
 	return User{
 		UserId: key,
 		Email:  u.Email,
+	}
+}
+
+func (u User) Record() []Tuple {
+	return []Tuple{
+		NewTuple("userid", u.UserId),
+		NewTuple("email", u.Email),
 	}
 }
 

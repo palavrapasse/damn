@@ -58,7 +58,9 @@ func TestCanCreateBadActorWithIdentifierThatDoesNotExceed30Characters(t *testing
 func TestCanCreateBadActorAndTrimsIdentifierSpaces(t *testing.T) {
 	identifier := " identifier    "
 
-	ba, _ := NewBadActor(identifier)
+	ba, err := NewBadActor(identifier)
+
+	panicOnError(err)
 
 	if len(ba.Identifier) == len(identifier) {
 		t.Fatalf("Original identifier string contains unneeded spaces, and should be trimmed, but output summary still contains those spaces")

@@ -8,9 +8,9 @@ import (
 type Context string
 
 type Leak struct {
-	LeakId      AutoGenKey
-	ShareDateSC DateInSeconds
 	Context     Context
+	ShareDateSC DateInSeconds
+	LeakId      AutoGenKey
 }
 
 func NewLeak(context string, shareDateSC DateInSeconds) (Leak, error) {
@@ -34,6 +34,14 @@ func (l Leak) Copy(key AutoGenKey) Leak {
 		LeakId:      key,
 		ShareDateSC: l.ShareDateSC,
 		Context:     l.Context,
+	}
+}
+
+func (l Leak) Record() []Tuple {
+	return []Tuple{
+		NewTuple("leakid", l.LeakId),
+		NewTuple("sharedatesc", l.ShareDateSC),
+		NewTuple("context", l.Context),
 	}
 }
 

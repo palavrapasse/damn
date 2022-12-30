@@ -68,7 +68,9 @@ func TestCanCreateUserWithEmailThatDoesNotExceed130Characters(t *testing.T) {
 func TestCanCreateUserAndTrimsEmailSpaces(t *testing.T) {
 	email := " email@gmail.com    "
 
-	leak, _ := NewUser(email)
+	leak, err := NewUser(email)
+
+	panicOnError(err)
 
 	if len(leak.Email) == len(email) {
 		t.Fatalf("Original email string contains unneeded spaces, and should be trimmed, but output summary still contains those spaces")

@@ -64,7 +64,9 @@ func TestCanCreateLeakAndTrimsContextSpaces(t *testing.T) {
 	dateInSeconds := DateInSeconds(10)
 	context := " context    "
 
-	leak, _ := NewLeak(context, dateInSeconds)
+	leak, err := NewLeak(context, dateInSeconds)
+
+	panicOnError(err)
 
 	if len(leak.Context) == len(context) {
 		t.Fatalf("Original context string contains unneeded spaces, and should be trimmed, but output summary still contains those spaces")

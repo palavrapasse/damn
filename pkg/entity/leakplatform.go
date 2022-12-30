@@ -11,3 +11,10 @@ func NewLeakPlatform(plat Platform, leak Leak) LeakPlatform {
 		LeakId: leak.LeakId,
 	}
 }
+
+func (lpt LeakPlatform) Record() []Tuple {
+	return []Tuple{
+		NewTuple("platid", lpt.PlatId),
+		NewTuple("leakid", lpt.LeakId),
+	}
+}

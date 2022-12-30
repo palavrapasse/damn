@@ -8,8 +8,8 @@ import (
 type Password string
 
 type Credentials struct {
-	CredId   AutoGenKey
 	Password Password
+	CredId   AutoGenKey
 }
 
 func NewPassword(password string) (Password, error) {
@@ -35,6 +35,13 @@ func (c Credentials) Copy(key AutoGenKey) Credentials {
 	return Credentials{
 		CredId:   key,
 		Password: c.Password,
+	}
+}
+
+func (c Credentials) Record() []Tuple {
+	return []Tuple{
+		NewTuple("credid", c.CredId),
+		NewTuple("password", c.Password),
 	}
 }
 

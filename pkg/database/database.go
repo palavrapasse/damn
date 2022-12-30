@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"reflect"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -50,7 +52,13 @@ func (ctx DatabaseContext) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			log.Printf("could not complete transaction: %v", err)
+
+			err = tx.Rollback()
+		}
+
+		if err != nil {
+			log.Printf("could not rollback transaction: %v", err)
 		}
 	}()
 
@@ -134,7 +142,7 @@ func (ctx DatabaseContext) Insert(i Import) error {
 	}()
 
 	if err == nil {
-		tx.Commit()
+		err = tx.Commit()
 	}
 
 	return err
@@ -157,7 +165,6 @@ func (ctx TransactionContext) findPrimary(t PrimaryTable) (PrimaryTable, error) 
 		for _, r := range records {
 			if !t.HasPrimaryKeySet(r) {
 				var row *sql.Row
-				var rid int64
 				var rvp []*any
 				var rvpp []any
 
@@ -176,9 +183,13 @@ func (ctx TransactionContext) findPrimary(t PrimaryTable) (PrimaryTable, error) 
 				}
 
 				if err == nil {
-					rid = (*rvp[0]).(int64)
+					rid, ok := (*rvp[0]).(int64)
 
-					updatedRecords = append(updatedRecords, CopyWithNewKey(r, AutoGenKey(rid)))
+					if ok {
+						updatedRecords = append(updatedRecords, CopyWithNewKey(r, AutoGenKey(rid)))
+					} else {
+						err = fmt.Errorf("could not convert first query result to int64: %v", rvp)
+					}
 				} else {
 					break
 				}

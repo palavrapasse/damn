@@ -46,7 +46,9 @@ func TestCanCreateDateInSeconds(t *testing.T) {
 
 func TestCanReturnDateInSecondsString(t *testing.T) {
 	date := "2022-12-02"
-	ds, _ := NewDateInSeconds(date)
+	ds, err := NewDateInSeconds(date)
+
+	panicOnError(err)
 
 	dsString := ds.String()
 

@@ -6,8 +6,8 @@ import (
 )
 
 type Platform struct {
-	PlatId AutoGenKey
 	Name   string
+	PlatId AutoGenKey
 }
 
 func NewPlatform(name string) (Platform, error) {
@@ -29,6 +29,13 @@ func (p Platform) Copy(key AutoGenKey) Platform {
 	return Platform{
 		PlatId: key,
 		Name:   p.Name,
+	}
+}
+
+func (pt Platform) Record() []Tuple {
+	return []Tuple{
+		NewTuple("platid", pt.PlatId),
+		NewTuple("name", pt.Name),
 	}
 }
 

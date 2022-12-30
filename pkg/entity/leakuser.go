@@ -11,3 +11,10 @@ func NewLeakUser(user User, leak Leak) LeakUser {
 		LeakId: leak.LeakId,
 	}
 }
+
+func (lu LeakUser) Record() []Tuple {
+	return []Tuple{
+		NewTuple("userid", lu.UserId),
+		NewTuple("leakid", lu.LeakId),
+	}
+}
