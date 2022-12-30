@@ -101,6 +101,7 @@ linters:
     - decorder
     - errorlint
     - goconst
+    - godot
   # Enable all available linters.
   # Default: false
   enable-all: false
@@ -309,6 +310,23 @@ linters-settings:
     # Ignore when constant is not used as function argument.
     # Default: true
     ignore-calls: false
+
+  godot:
+      # Comments to be checked: `declarations`, `toplevel`, or `all`.
+      # Default: declarations
+      scope: toplevel
+      # List of regexps for excluding particular comment lines from check.
+      # Default: []
+      exclude:
+        # Exclude todo and fixme comments.
+        - "^fixme:"
+        - "^todo:"
+      # Check that each sentence ends with a period.
+      # Default: true
+      period: true
+      # Check that each sentence starts with a capital letter.
+      # Default: false
+      capital: true
 
 issues:
   # List of regexps of issue texts to exclude.
