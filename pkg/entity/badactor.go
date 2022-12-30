@@ -6,8 +6,8 @@ import (
 )
 
 type BadActor struct {
-	BaId       AutoGenKey
 	Identifier string
+	BaId       AutoGenKey
 }
 
 func NewBadActor(identifier string) (BadActor, error) {

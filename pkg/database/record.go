@@ -38,19 +38,19 @@ func CopyWithNewKey(r Record, k entity.AutoGenKey) Record {
 
 	switch r.(type) {
 	case entity.BadActor:
-		r, _ := r.(entity.BadActor)
+		r := r.(entity.BadActor)
 		rr = r.Copy(k)
 	case entity.Credentials:
-		r, _ := r.(entity.Credentials)
+		r := r.(entity.Credentials)
 		rr = r.Copy(k)
 	case entity.Leak:
-		r, _ := r.(entity.Leak)
+		r := r.(entity.Leak)
 		rr = r.Copy(k)
 	case entity.Platform:
-		r, _ := r.(entity.Platform)
+		r := r.(entity.Platform)
 		rr = r.Copy(k)
 	case entity.User:
-		r, _ := r.(entity.User)
+		r := r.(entity.User)
 		rr = r.Copy(k)
 	default:
 		rr = r

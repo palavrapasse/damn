@@ -28,7 +28,9 @@ func TestCanCreatePassword(t *testing.T) {
 func TestCanCreatePasswordAndTrimsSpaces(t *testing.T) {
 	password := " password    "
 
-	p, _ := NewPassword(password)
+	p, err := NewPassword(password)
+
+	panicOnError(err)
 
 	if len(p) == len(password) {
 		t.Fatalf("Original password string contains unneeded spaces, and should be trimmed, but output password still contains those spaces")

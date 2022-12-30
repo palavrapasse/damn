@@ -8,8 +8,8 @@ import (
 type Password string
 
 type Credentials struct {
-	CredId   AutoGenKey
 	Password Password
+	CredId   AutoGenKey
 }
 
 func NewPassword(password string) (Password, error) {

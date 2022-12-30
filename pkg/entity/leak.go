@@ -8,9 +8,9 @@ import (
 type Context string
 
 type Leak struct {
-	LeakId      AutoGenKey
-	ShareDateSC DateInSeconds
 	Context     Context
+	ShareDateSC DateInSeconds
+	LeakId      AutoGenKey
 }
 
 func NewLeak(context string, shareDateSC DateInSeconds) (Leak, error) {

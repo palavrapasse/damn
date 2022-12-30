@@ -9,8 +9,8 @@ import (
 type Email string
 
 type User struct {
-	UserId AutoGenKey
 	Email  Email
+	UserId AutoGenKey
 }
 
 func NewUser(email string) (User, error) {

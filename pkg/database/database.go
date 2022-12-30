@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"reflect"
 
@@ -164,7 +165,6 @@ func (ctx TransactionContext) findPrimary(t PrimaryTable) (PrimaryTable, error) 
 		for _, r := range records {
 			if !t.HasPrimaryKeySet(r) {
 				var row *sql.Row
-				var rid int64
 				var rvp []*any
 				var rvpp []any
 
@@ -183,9 +183,13 @@ func (ctx TransactionContext) findPrimary(t PrimaryTable) (PrimaryTable, error) 
 				}
 
 				if err == nil {
-					rid = (*rvp[0]).(int64)
+					rid, ok := (*rvp[0]).(int64)
 
-					updatedRecords = append(updatedRecords, CopyWithNewKey(r, AutoGenKey(rid)))
+					if ok {
+						updatedRecords = append(updatedRecords, CopyWithNewKey(r, AutoGenKey(rid)))
+					} else {
+						err = fmt.Errorf("could not convert first query result to int64: %v", rvp)
+					}
 				} else {
 					break
 				}

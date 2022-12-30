@@ -58,7 +58,9 @@ func TestCanCreatePlatformWithContextThatDoesNotExceed30Characters(t *testing.T)
 func TestCanCreatePlatformAndTrimsContextSpaces(t *testing.T) {
 	name := " name    "
 
-	leak, _ := NewPlatform(name)
+	leak, err := NewPlatform(name)
+
+	panicOnError(err)
 
 	if len(leak.Name) == len(name) {
 		t.Fatalf("Original name string contains unneeded spaces, and should be trimmed, but output summary still contains those spaces")

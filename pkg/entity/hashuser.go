@@ -1,8 +1,8 @@
 package entity
 
 type HashUser struct {
-	UserId  AutoGenKey
 	HSHA256 HSHA256
+	UserId  AutoGenKey
 }
 
 func NewHashUser(us User) HashUser {

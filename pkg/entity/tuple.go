@@ -1,8 +1,8 @@
 package entity
 
 type Tuple struct {
-	Key   string
 	Value any
+	Key   string
 }
 
 func NewTuple(k string, v any) Tuple {

@@ -6,8 +6,8 @@ import (
 )
 
 type Platform struct {
-	PlatId AutoGenKey
 	Name   string
+	PlatId AutoGenKey
 }
 
 func NewPlatform(name string) (Platform, error) {

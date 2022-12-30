@@ -1,8 +1,8 @@
 package entity
 
 type HashCredentials struct {
-	CredId  AutoGenKey
 	HSHA256 HSHA256
+	CredId  AutoGenKey
 }
 
 func NewHashCredentials(cr Credentials) HashCredentials {
