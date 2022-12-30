@@ -2,7 +2,6 @@ package database
 
 import (
 	"reflect"
-	"strings"
 
 	"github.com/palavrapasse/damn/pkg/entity"
 )
@@ -13,23 +12,22 @@ type Records []Record
 type Field string
 
 func Fields(r Record) []Field {
-	rf := reflectFields(r)
-	fs := make([]Field, len(rf))
+	rr := reflectRecord(r)
+	fs := make([]Field, len(rr))
 
-	for i, f := range rf {
-		fs[i] = Field(strings.ToLower(f.Name))
+	for i, f := range rr {
+		fs[i] = Field(f.Key)
 	}
 
 	return fs
 }
 
 func Values(r Record) []any {
-	rf := reflectFields(r)
-	rv := reflect.ValueOf(r)
-	vs := make([]any, len(rf))
+	rr := reflectRecord(r)
+	vs := make([]any, len(rr))
 
-	for i, f := range rf {
-		vs[i] = rv.FieldByName(f.Name).Interface()
+	for i, f := range rr {
+		vs[i] = f.Value
 	}
 
 	return vs
@@ -61,6 +59,6 @@ func CopyWithNewKey(r Record, k entity.AutoGenKey) Record {
 	return rr
 }
 
-func reflectFields(r Record) []reflect.StructField {
-	return reflect.VisibleFields(reflect.TypeOf(r))
+func reflectRecord(r Record) []entity.Tuple {
+	return reflect.ValueOf(r).MethodByName("Record").Call(nil)[0].Interface().([]entity.Tuple)
 }

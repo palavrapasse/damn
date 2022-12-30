@@ -25,6 +25,13 @@ func NewBadActor(identifier string) (BadActor, error) {
 	return ba, err
 }
 
+func (ba BadActor) Record() []Tuple {
+	return []Tuple{
+		NewTuple("baid", ba.BaId),
+		NewTuple("identifier", ba.Identifier),
+	}
+}
+
 func (ba BadActor) Copy(key AutoGenKey) BadActor {
 	return BadActor{
 		BaId:       key,

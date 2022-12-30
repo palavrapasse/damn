@@ -11,3 +11,10 @@ func NewUserCredentials(cred Credentials, user User) UserCredentials {
 		UserId: user.UserId,
 	}
 }
+
+func (uc UserCredentials) Record() []Tuple {
+	return []Tuple{
+		NewTuple("credid", uc.CredId),
+		NewTuple("userid", uc.UserId),
+	}
+}

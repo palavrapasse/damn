@@ -37,6 +37,14 @@ func (l Leak) Copy(key AutoGenKey) Leak {
 	}
 }
 
+func (l Leak) Record() []Tuple {
+	return []Tuple{
+		NewTuple("leakid", l.LeakId),
+		NewTuple("sharedatesc", l.ShareDateSC),
+		NewTuple("context", l.Context),
+	}
+}
+
 func checkIfContextConstraintsAreMet(c string) error {
 	size := len(c)
 

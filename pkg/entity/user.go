@@ -35,6 +35,13 @@ func (u User) Copy(key AutoGenKey) User {
 	}
 }
 
+func (u User) Record() []Tuple {
+	return []Tuple{
+		NewTuple("userid", u.UserId),
+		NewTuple("email", u.Email),
+	}
+}
+
 func checkIfEmailConstraintsAreMet(e string) error {
 	_, err := mail.ParseAddress(e)
 

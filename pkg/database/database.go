@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"log"
 	"reflect"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -50,7 +51,13 @@ func (ctx DatabaseContext) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			log.Printf("could not complete transaction: %v", err)
+
+			err = tx.Rollback()
+		}
+
+		if err != nil {
+			log.Printf("could not rollback transaction: %v", err)
 		}
 	}()
 
@@ -134,7 +141,7 @@ func (ctx DatabaseContext) Insert(i Import) error {
 	}()
 
 	if err == nil {
-		tx.Commit()
+		err = tx.Commit()
 	}
 
 	return err

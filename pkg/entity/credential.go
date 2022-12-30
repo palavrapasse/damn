@@ -38,6 +38,13 @@ func (c Credentials) Copy(key AutoGenKey) Credentials {
 	}
 }
 
+func (c Credentials) Record() []Tuple {
+	return []Tuple{
+		NewTuple("credid", c.CredId),
+		NewTuple("password", c.Password),
+	}
+}
+
 func checkIfPasswordConstraintsAreMet(p string) error {
 	size := len(p)
 

@@ -32,6 +32,13 @@ func (p Platform) Copy(key AutoGenKey) Platform {
 	}
 }
 
+func (pt Platform) Record() []Tuple {
+	return []Tuple{
+		NewTuple("platid", pt.PlatId),
+		NewTuple("name", pt.Name),
+	}
+}
+
 func checkIfPlatformNameConstraintsAreMet(n string) error {
 	size := len(n)
 
