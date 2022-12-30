@@ -14,7 +14,7 @@ func NewHashUser(us User) HashUser {
 
 func (hu HashUser) Record() []Tuple {
 	return []Tuple{
-		NewTuple("userid", hu.UserId),
-		NewTuple("hsha256", hu.HSHA256),
+		NewTuple(UserIdField, hu.UserId),
+		NewTuple(HSHA256IdField, hu.HSHA256),
 	}
 }

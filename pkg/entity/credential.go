@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	CredentialsIdField       = "credid"
+	CredentialsPasswordField = "password"
+)
+
 type Password string
 
 type Credentials struct {
@@ -40,8 +45,8 @@ func (c Credentials) Copy(key AutoGenKey) Credentials {
 
 func (c Credentials) Record() []Tuple {
 	return []Tuple{
-		NewTuple("credid", c.CredId),
-		NewTuple("password", c.Password),
+		NewTuple(CredentialsIdField, c.CredId),
+		NewTuple(CredentialsPasswordField, c.Password),
 	}
 }
 

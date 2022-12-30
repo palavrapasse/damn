@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	PlatformIdField   = "platid"
+	PlatformNameField = "name"
+)
+
 type Platform struct {
 	Name   string
 	PlatId AutoGenKey
@@ -34,8 +39,8 @@ func (p Platform) Copy(key AutoGenKey) Platform {
 
 func (pt Platform) Record() []Tuple {
 	return []Tuple{
-		NewTuple("platid", pt.PlatId),
-		NewTuple("name", pt.Name),
+		NewTuple(PlatformIdField, pt.PlatId),
+		NewTuple(PlatformNameField, pt.Name),
 	}
 }
 

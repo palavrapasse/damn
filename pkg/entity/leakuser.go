@@ -14,7 +14,7 @@ func NewLeakUser(user User, leak Leak) LeakUser {
 
 func (lu LeakUser) Record() []Tuple {
 	return []Tuple{
-		NewTuple("userid", lu.UserId),
-		NewTuple("leakid", lu.LeakId),
+		NewTuple(UserIdField, lu.UserId),
+		NewTuple(LeakIdField, lu.LeakId),
 	}
 }

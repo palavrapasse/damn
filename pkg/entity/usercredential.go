@@ -14,7 +14,7 @@ func NewUserCredentials(cred Credentials, user User) UserCredentials {
 
 func (uc UserCredentials) Record() []Tuple {
 	return []Tuple{
-		NewTuple("credid", uc.CredId),
-		NewTuple("userid", uc.UserId),
+		NewTuple(CredentialsIdField, uc.CredId),
+		NewTuple(UserIdField, uc.UserId),
 	}
 }

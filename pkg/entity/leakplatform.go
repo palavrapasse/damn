@@ -14,7 +14,7 @@ func NewLeakPlatform(plat Platform, leak Leak) LeakPlatform {
 
 func (lpt LeakPlatform) Record() []Tuple {
 	return []Tuple{
-		NewTuple("platid", lpt.PlatId),
-		NewTuple("leakid", lpt.LeakId),
+		NewTuple(PlatformIdField, lpt.PlatId),
+		NewTuple(LeakIdField, lpt.LeakId),
 	}
 }

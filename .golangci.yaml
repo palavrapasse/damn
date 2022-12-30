@@ -100,6 +100,7 @@ linters:
     - unused
     - decorder
     - errorlint
+    - goconst
   # Enable all available linters.
   # Default: false
   enable-all: false
@@ -283,6 +284,32 @@ linters-settings:
     # Default: true
     comparison: true
     
+  goconst:
+    # Minimal length of string constant.
+    # Default: 3
+    min-len: 2
+    # Minimum occurrences of constant string count to trigger issue.
+    # Default: 3
+    min-occurrences: 3
+    # Ignore test files.
+    # Default: false
+    ignore-tests: true
+    # Look for existing constants matching the values.
+    # Default: true
+    match-constant: true
+    # Search also for duplicated numbers.
+    # Default: false
+    numbers: true
+    # Minimum value, only works with goconst.numbers
+    # Default: 3
+    min: 2
+    # Maximum value, only works with goconst.numbers
+    # Default: 3
+    max: 2
+    # Ignore when constant is not used as function argument.
+    # Default: true
+    ignore-calls: false
+
 issues:
   # List of regexps of issue texts to exclude.
   #
