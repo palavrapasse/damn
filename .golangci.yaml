@@ -103,6 +103,7 @@ linters:
     - goconst
     - godot
     - godox
+    - revive
   # Enable all available linters.
   # Default: false
   enable-all: false
@@ -336,6 +337,62 @@ linters-settings:
     keywords:
       - bug
       - fixme
+
+  revive:
+    rules:
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-naming
+      - name: error-naming
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-return
+      - name: error-return
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-strings
+      - name: error-strings
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#errorf
+      - name: errorf
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#if-return
+      - name: if-return
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#increment-decrement
+      - name: increment-decrement
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#indent-error-flow
+      - name: indent-error-flow
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#max-public-structs
+      - name: max-public-structs
+        severity: warning
+        disabled: false
+        arguments: [16]
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#nested-structs
+      - name: nested-structs
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#optimize-operands-order
+      - name: optimize-operands-order
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#receiver-naming
+      - name: receiver-naming
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#redefines-builtin-id
+      - name: redefines-builtin-id
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#useless-break
+      - name: useless-break
+        severity: warning
+        disabled: false
 
 issues:
   # List of regexps of issue texts to exclude.

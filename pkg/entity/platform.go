@@ -37,10 +37,10 @@ func (p Platform) Copy(key AutoGenKey) Platform {
 	}
 }
 
-func (pt Platform) Record() []Tuple {
+func (p Platform) Record() []Tuple {
 	return []Tuple{
-		NewTuple(PlatformIdField, pt.PlatId),
-		NewTuple(PlatformNameField, pt.Name),
+		NewTuple(PlatformIdField, p.PlatId),
+		NewTuple(PlatformNameField, p.Name),
 	}
 }
 

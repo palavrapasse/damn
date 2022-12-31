@@ -36,21 +36,16 @@ func Values(r Record) []any {
 func CopyWithNewKey(r Record, k entity.AutoGenKey) Record {
 	var rr Record
 
-	switch r.(type) {
+	switch r := r.(type) {
 	case entity.BadActor:
-		r := r.(entity.BadActor)
 		rr = r.Copy(k)
 	case entity.Credentials:
-		r := r.(entity.Credentials)
 		rr = r.Copy(k)
 	case entity.Leak:
-		r := r.(entity.Leak)
 		rr = r.Copy(k)
 	case entity.Platform:
-		r := r.(entity.Platform)
 		rr = r.Copy(k)
 	case entity.User:
-		r := r.(entity.User)
 		rr = r.Copy(k)
 	default:
 		rr = r

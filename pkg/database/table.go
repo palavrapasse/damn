@@ -322,9 +322,9 @@ func (t DatabaseTable) Name() string {
 
 	if len(rs) > 0 {
 		return strings.Split(fmt.Sprintf("%T", rs[0]), ".")[1]
-	} else {
-		return unknownTableName
 	}
+
+	return unknownTableName
 }
 
 func (t DatabaseTable) Fields() []Field {
@@ -332,9 +332,9 @@ func (t DatabaseTable) Fields() []Field {
 
 	if len(rs) > 0 {
 		return Fields(rs[0])
-	} else {
-		return unknownTableFields
 	}
+
+	return unknownTableFields
 }
 
 func (pt PrimaryTable) prepareInsertStatementString() string {
