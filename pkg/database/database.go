@@ -10,6 +10,10 @@ import (
 	. "github.com/palavrapasse/damn/pkg/entity"
 )
 
+const (
+	_sqliteDriverName = "sqlite3"
+)
+
 type DatabaseContext struct {
 	DB       *sql.DB
 	FilePath string
@@ -18,10 +22,6 @@ type DatabaseContext struct {
 type TransactionContext struct {
 	Tx *sql.Tx
 }
-
-const (
-	_sqliteDriverName = "sqlite3"
-)
 
 func NewDatabaseContext(fp string) (DatabaseContext, error) {
 	db, err := sql.Open(_sqliteDriverName, fp)

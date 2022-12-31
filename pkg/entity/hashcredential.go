@@ -14,7 +14,7 @@ func NewHashCredentials(cr Credentials) HashCredentials {
 
 func (hc HashCredentials) Record() []Tuple {
 	return []Tuple{
-		NewTuple("credid", hc.CredId),
-		NewTuple("hsha256", hc.HSHA256),
+		NewTuple(CredentialsIdField, hc.CredId),
+		NewTuple(HSHA256IdField, hc.HSHA256),
 	}
 }

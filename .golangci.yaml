@@ -98,6 +98,12 @@ linters:
     - tagliatelle
     - typecheck
     - unused
+    - decorder
+    - errorlint
+    - goconst
+    - godot
+    - godox
+    - revive
   # Enable all available linters.
   # Default: false
   enable-all: false
@@ -250,6 +256,143 @@ linters-settings:
         # Support string case: `camel`, `pascal`, `kebab`, `snake`, `goCamel`, `goPascal`, `goKebab`, `goSnake`, `upper`, `lower`
         json: camel
         yaml: camel
+
+  decorder:
+    # Required order of `type`, `const`, `var` and `func` declarations inside a file.
+    # Default: types before constants before variables before functions.
+    dec-order:
+      - const
+      - var
+      - type
+      - func
+    # If true, order of declarations is not checked at all.
+    # Default: true (disabled)
+    disable-dec-order-check: false
+    # If true, `init` func can be anywhere in file (does not have to be declared before all other functions).
+    # Default: true (disabled)
+    disable-init-func-first-check: false
+    # If true, multiple global `type`, `const` and `var` declarations are allowed.
+    # Default: true (disabled)
+    disable-dec-num-check: true
+  
+  errorlint:
+    # Check whether fmt.Errorf uses the %w verb for formatting errors.
+    # See the https://github.com/polyfloyd/go-errorlint for caveats.
+    # Default: true
+    errorf: true
+    # Check for plain type assertions and type switches.
+    # Default: true
+    asserts: true
+    # Check for plain error comparisons.
+    # Default: true
+    comparison: true
+    
+  goconst:
+    # Minimal length of string constant.
+    # Default: 3
+    min-len: 2
+    # Minimum occurrences of constant string count to trigger issue.
+    # Default: 3
+    min-occurrences: 3
+    # Ignore test files.
+    # Default: false
+    ignore-tests: true
+    # Look for existing constants matching the values.
+    # Default: true
+    match-constant: true
+    # Search also for duplicated numbers.
+    # Default: false
+    numbers: true
+    # Minimum value, only works with goconst.numbers
+    # Default: 3
+    min: 2
+    # Maximum value, only works with goconst.numbers
+    # Default: 3
+    max: 2
+    # Ignore when constant is not used as function argument.
+    # Default: true
+    ignore-calls: false
+
+  godot:
+      # Comments to be checked: `declarations`, `toplevel`, or `all`.
+      # Default: declarations
+      scope: toplevel
+      # List of regexps for excluding particular comment lines from check.
+      # Default: []
+      exclude:
+        # Exclude todo and fixme comments.
+        - "^fixme:"
+        - "^todo:"
+      # Check that each sentence ends with a period.
+      # Default: true
+      period: true
+      # Check that each sentence starts with a capital letter.
+      # Default: false
+      capital: true
+
+  godox:
+    # Report any comments starting with keywords, this is useful for TODO or FIXME comments that
+    # might be left in the code accidentally and should be resolved before merging.
+    # Default: ["TODO", "BUG", "FIXME"]
+    keywords:
+      - bug
+      - fixme
+
+  revive:
+    rules:
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-naming
+      - name: error-naming
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-return
+      - name: error-return
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#error-strings
+      - name: error-strings
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#errorf
+      - name: errorf
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#if-return
+      - name: if-return
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#increment-decrement
+      - name: increment-decrement
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#indent-error-flow
+      - name: indent-error-flow
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#max-public-structs
+      - name: max-public-structs
+        severity: warning
+        disabled: false
+        arguments: [16]
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#nested-structs
+      - name: nested-structs
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#optimize-operands-order
+      - name: optimize-operands-order
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#receiver-naming
+      - name: receiver-naming
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#redefines-builtin-id
+      - name: redefines-builtin-id
+        severity: warning
+        disabled: false
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#useless-break
+      - name: useless-break
+        severity: warning
+        disabled: false
 
 issues:
   # List of regexps of issue texts to exclude.

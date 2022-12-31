@@ -14,7 +14,7 @@ func NewLeakBadActor(ba BadActor, leak Leak) LeakBadActor {
 
 func (lba LeakBadActor) Record() []Tuple {
 	return []Tuple{
-		NewTuple("baid", lba.BaId),
-		NewTuple("leakid", lba.LeakId),
+		NewTuple(BadActorIdField, lba.BaId),
+		NewTuple(LeakIdField, lba.LeakId),
 	}
 }

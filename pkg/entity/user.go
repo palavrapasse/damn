@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+const (
+	UserIdField    = "userid"
+	UserEmailField = "email"
+)
+
 type Email string
 
 type User struct {
@@ -37,8 +42,8 @@ func (u User) Copy(key AutoGenKey) User {
 
 func (u User) Record() []Tuple {
 	return []Tuple{
-		NewTuple("userid", u.UserId),
-		NewTuple("email", u.Email),
+		NewTuple(UserIdField, u.UserId),
+		NewTuple(UserEmailField, u.Email),
 	}
 }
 

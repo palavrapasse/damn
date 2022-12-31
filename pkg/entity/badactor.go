@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	BadActorIdField         = "baid"
+	BadActorIdentifierField = "identifier"
+)
+
 type BadActor struct {
 	Identifier string
 	BaId       AutoGenKey
@@ -27,8 +32,8 @@ func NewBadActor(identifier string) (BadActor, error) {
 
 func (ba BadActor) Record() []Tuple {
 	return []Tuple{
-		NewTuple("baid", ba.BaId),
-		NewTuple("identifier", ba.Identifier),
+		NewTuple(BadActorIdField, ba.BaId),
+		NewTuple(BadActorIdentifierField, ba.Identifier),
 	}
 }
 

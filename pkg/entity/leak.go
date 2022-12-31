@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+const (
+	LeakIdField          = "leakid"
+	LeakContextField     = "context"
+	LeakShareDateSCField = "sharedatesc"
+)
+
 type Context string
 
 type Leak struct {
@@ -39,9 +45,9 @@ func (l Leak) Copy(key AutoGenKey) Leak {
 
 func (l Leak) Record() []Tuple {
 	return []Tuple{
-		NewTuple("leakid", l.LeakId),
-		NewTuple("sharedatesc", l.ShareDateSC),
-		NewTuple("context", l.Context),
+		NewTuple(LeakIdField, l.LeakId),
+		NewTuple(LeakShareDateSCField, l.ShareDateSC),
+		NewTuple(LeakContextField, l.Context),
 	}
 }
 

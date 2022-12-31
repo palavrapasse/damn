@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+const HSHA256IdField = "hsha256"
+
 type HSHA256 string
 
 func NewHSHA256(plainText string) HSHA256 {
