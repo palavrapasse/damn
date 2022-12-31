@@ -7,8 +7,8 @@ import (
 
 const (
 	LeakIdField          = "leakid"
-	LeakContextField     = "sharedatesc"
-	LeakShareDateSCField = "context"
+	LeakContextField     = "context"
+	LeakShareDateSCField = "sharedatesc"
 )
 
 type Context string
