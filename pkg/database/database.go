@@ -23,6 +23,8 @@ type TransactionContext[R Record] struct {
 	Tx *sql.Tx
 }
 
+type AnonymousErrorCallback func() (any, error)
+
 func NewDatabaseContext[R Record](fp string) (DatabaseContext[R], error) {
 	db, err := sql.Open(_sqliteDriverName, fp)
 
@@ -85,42 +87,40 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 
 		// Primary first
 
-		ut := NewUserTable(us)
-		ct := NewCredentialsTable(cr)
-		bat := NewBadActorTable(i.Leakers)
-		lt := NewLeakTable(i.Leak)
-		pt := NewPlatformTable(i.AffectedPlatforms)
+		var pts []any
 
-		ptt := []any{ut, ct, bat, lt, pt}
+		cbs := []AnonymousErrorCallback{
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[User](tctx), NewUserTable(us))
+			},
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Credentials](tctx), NewCredentialsTable(cr))
+			},
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[BadActor](tctx), NewBadActorTable(i.Leakers))
+			},
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Leak](tctx), NewLeakTable(i.Leak))
+			},
 
-		for j, t := range ptt {
-			tc := t.(PrimaryTable[Record])
-			t, err = tctx.insertPrimary(tc)
-
-			if err == nil {
-				t, err = tctx.findPrimary(tc)
-			}
-
-			if err == nil {
-				ptt[j] = t
-			} else {
-				return
-			}
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Platform](tctx), NewPlatformTable(i.AffectedPlatforms))
+			},
 		}
 
-		ut = ptt[0].(PrimaryTable[User])
-		ct = ptt[1].(PrimaryTable[Credentials])
-		bat = ptt[2].(PrimaryTable[BadActor])
-		lt = ptt[3].(PrimaryTable[Leak])
-		pt = ptt[4].(PrimaryTable[Platform])
+		pts, err = returnOnCallbackError(cbs)
+
+		if err != nil {
+			return
+		}
 
 		// Foreign now
 
-		us = ut.Records
-		cr = ct.Records
-		bas := bat.Records
-		ls := lt.Records
-		ps := pt.Records
+		us = pts[0].(PrimaryTable[User]).Records
+		cr = pts[1].(PrimaryTable[Credentials]).Records
+		bas := pts[2].(PrimaryTable[BadActor]).Records
+		ls := pts[3].(PrimaryTable[Leak]).Records
+		ps := pts[4].(PrimaryTable[Platform]).Records
 
 		l := ls[0]
 		afu := map[User]Credentials{}
@@ -129,25 +129,34 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 			afu[us[k]] = cr[k]
 		}
 
-		hct := NewHashCredentialsTable(cr)
-		hut := NewHashUserTable(us)
-		lbat := NewLeakBadActorTable(map[Leak][]BadActor{l: bas})
-		lcrt := NewLeakCredentialsTable(map[Leak][]Credentials{l: cr})
-		lptt := NewLeakPlatformTable(map[Leak][]Platform{l: ps})
-		lut := NewLeakUserTable(map[Leak][]User{l: us})
-		uct := NewUserCredentialsTable(afu)
+		cbs = []AnonymousErrorCallback{
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[HashCredentials](tctx), NewHashCredentialsTable(cr))
+			},
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[HashUser](tctx), NewHashUserTable(us))
+			},
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[LeakBadActor](tctx), NewLeakBadActorTable(map[Leak][]BadActor{l: bas}))
+			},
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[LeakCredentials](tctx), NewLeakCredentialsTable(map[Leak][]Credentials{l: cr}))
+			},
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[LeakPlatform](tctx), NewLeakPlatformTable(map[Leak][]Platform{l: ps}))
+			},
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[LeakUser](tctx), NewLeakUserTable(map[Leak][]User{l: us}))
+			},
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[UserCredentials](tctx), NewUserCredentialsTable(afu))
+			},
+		}
 
-		ftt := []any{hct, hut, lbat, lcrt, lptt, lut, uct}
+		_, err = returnOnCallbackError(cbs)
 
-		for j, t := range ftt {
-			tc := t.(ForeignTable[Record])
-			t, err = tctx.insertForeign(tc)
-
-			if err == nil {
-				ftt[j] = t
-			} else {
-				return
-			}
+		if err != nil {
+			return
 		}
 	}()
 
@@ -331,4 +340,40 @@ func (ctx TransactionContext[R]) insertForeign(t ForeignTable[R]) (ForeignTable[
 	}
 
 	return t.Copy(updatedRecords), err
+}
+
+func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
+	tctx := TransactionContext[R]{Tx: ctx.Tx}
+
+	tu, err := tctx.insertPrimary(t)
+
+	if err == nil {
+		tu, err = tctx.findPrimary(tu)
+	}
+
+	return tu, err
+}
+
+func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
+	return ctx.insertForeign(t)
+}
+
+func returnOnCallbackError(cbs []AnonymousErrorCallback) ([]any, error) {
+	var err error
+
+	res := make([]any, len(cbs))
+
+	for i, cb := range cbs {
+		var t any
+
+		t, err = cb()
+
+		if err != nil {
+			break
+		}
+
+		res[i] = t
+	}
+
+	return res, err
 }
