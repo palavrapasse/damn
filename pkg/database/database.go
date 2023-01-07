@@ -14,39 +14,47 @@ const (
 	_sqliteDriverName = "sqlite3"
 )
 
-type DatabaseContext struct {
+type DatabaseContext[R Record] struct {
 	DB       *sql.DB
 	FilePath string
 }
 
-type TransactionContext struct {
+type TransactionContext[R Record] struct {
 	Tx *sql.Tx
 }
 
-func NewDatabaseContext(fp string) (DatabaseContext, error) {
+func NewDatabaseContext[R Record](fp string) (DatabaseContext[R], error) {
 	db, err := sql.Open(_sqliteDriverName, fp)
 
 	if err == nil {
 		err = db.Ping()
 	}
 
-	return DatabaseContext{
+	return DatabaseContext[R]{
 		DB:       db,
 		FilePath: fp,
 	}, err
 }
 
-func NewTransactionContext(db *sql.DB) (TransactionContext, error) {
-	tx, err := db.Begin()
+func (ctx DatabaseContext[R]) NewTransactionContext() (TransactionContext[R], error) {
+	tx, err := ctx.DB.Begin()
 
-	return TransactionContext{Tx: tx}, err
+	return TransactionContext[R]{Tx: tx}, err
 }
 
-func (ctx DatabaseContext) Insert(i Import) error {
+func Convert[R Record, T User](ctx DatabaseContext[R]) DatabaseContext[T] {
+	return DatabaseContext[T]{}
+}
+
+func (ctx DatabaseContext[Record]) Insert(i Import) error {
+
+	// ctxd := Convert(ctx)
+
+	// ctxd.CustomQuery("", func() (User, []any) { return User{}, []any{} })
+
 	var tx *sql.Tx
 
-	db := ctx.DB
-	tctx, err := NewTransactionContext(db)
+	tctx, err := ctx.NewTransactionContext()
 
 	tx = tctx.Tx
 
@@ -83,13 +91,14 @@ func (ctx DatabaseContext) Insert(i Import) error {
 		lt := NewLeakTable(i.Leak)
 		pt := NewPlatformTable(i.AffectedPlatforms)
 
-		ptt := []PrimaryTable{ut, ct, bat, lt, pt}
+		ptt := []any{ut, ct, bat, lt, pt}
 
 		for j, t := range ptt {
-			t, err = tctx.insertPrimary(t)
+			tc := t.(PrimaryTable[Record])
+			t, err = tctx.insertPrimary(tc)
 
 			if err == nil {
-				t, err = tctx.findPrimary(t)
+				t, err = tctx.findPrimary(tc)
 			}
 
 			if err == nil {
@@ -99,19 +108,19 @@ func (ctx DatabaseContext) Insert(i Import) error {
 			}
 		}
 
-		ut = ptt[0]
-		ct = ptt[1]
-		bat = ptt[2]
-		lt = ptt[3]
-		pt = ptt[4]
+		ut = ptt[0].(PrimaryTable[User])
+		ct = ptt[1].(PrimaryTable[Credentials])
+		bat = ptt[2].(PrimaryTable[BadActor])
+		lt = ptt[3].(PrimaryTable[Leak])
+		pt = ptt[4].(PrimaryTable[Platform])
 
 		// Foreign now
 
-		us = ut.ToUserSlice()
-		cr = ct.ToCredentialsSlice()
-		bas := bat.ToBadActorSlice()
-		ls := lt.ToLeakSlice()
-		ps := pt.ToPlatformSlice()
+		us = ut.Records
+		cr = ct.Records
+		bas := bat.Records
+		ls := lt.Records
+		ps := pt.Records
 
 		l := ls[0]
 		afu := map[User]Credentials{}
@@ -128,10 +137,11 @@ func (ctx DatabaseContext) Insert(i Import) error {
 		lut := NewLeakUserTable(map[Leak][]User{l: us})
 		uct := NewUserCredentialsTable(afu)
 
-		ftt := []ForeignTable{hct, hut, lbat, lcrt, lptt, lut, uct}
+		ftt := []any{hct, hut, lbat, lcrt, lptt, lut, uct}
 
 		for j, t := range ftt {
-			t, err = tctx.insertForeign(t)
+			tc := t.(ForeignTable[Record])
+			t, err = tctx.insertForeign(tc)
 
 			if err == nil {
 				ftt[j] = t
@@ -148,12 +158,67 @@ func (ctx DatabaseContext) Insert(i Import) error {
 	return err
 }
 
-func (ctx TransactionContext) findPrimary(t PrimaryTable) (PrimaryTable, error) {
+func (ctx DatabaseContext[R]) CustomQuery(q string, mp func() (R, []any), v ...any) ([]R, error) {
+	var tctx TransactionContext[R]
+	var tx *sql.Tx
+	var rs *sql.Rows
+	var stmt *sql.Stmt
+	var err error
+	var rcs []R
+
+	tctx, err = ctx.NewTransactionContext()
+
+	tx = tctx.Tx
+
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("could not complete transaction: %v", err)
+
+			err = tx.Rollback()
+		}
+
+		if err != nil {
+			err = fmt.Errorf("could not rollback transaction: %v", err)
+		}
+	}()
+
+	if err == nil {
+		func() {
+			stmt, err = tx.Prepare(q)
+
+			if err != nil {
+				return
+			}
+
+			rs, err = stmt.Query(v)
+
+			if err != nil {
+				return
+			}
+
+			for rs.Next() {
+				r, addrs := mp()
+
+				err = rs.Scan(addrs...)
+
+				if err != nil {
+					return
+				} else {
+					rcs = append(rcs, r)
+				}
+			}
+		}()
+	}
+
+	return rcs, err
+}
+
+func (ctx TransactionContext[R]) findPrimary(t PrimaryTable[R]) (PrimaryTable[R], error) {
 	var tx *sql.Tx
 	var stmt *sql.Stmt
 	var err error
 
-	var updatedRecords Records
+	var updatedRecords Records[R]
 
 	tx = ctx.Tx
 
@@ -202,12 +267,12 @@ func (ctx TransactionContext) findPrimary(t PrimaryTable) (PrimaryTable, error) 
 	return t.Copy(updatedRecords), err
 }
 
-func (ctx TransactionContext) insertPrimary(t PrimaryTable) (PrimaryTable, error) {
+func (ctx TransactionContext[R]) insertPrimary(t PrimaryTable[R]) (PrimaryTable[R], error) {
 	var tx *sql.Tx
 	var stmt *sql.Stmt
 	var err error
 
-	var updatedRecords Records
+	var updatedRecords Records[R]
 
 	tx = ctx.Tx
 
@@ -242,12 +307,12 @@ func (ctx TransactionContext) insertPrimary(t PrimaryTable) (PrimaryTable, error
 	return t.Copy(updatedRecords), err
 }
 
-func (ctx TransactionContext) insertForeign(t ForeignTable) (ForeignTable, error) {
+func (ctx TransactionContext[R]) insertForeign(t ForeignTable[R]) (ForeignTable[R], error) {
 	var tx *sql.Tx
 	var stmt *sql.Stmt
 	var err error
 
-	var updatedRecords Records
+	var updatedRecords Records[R]
 
 	tx = ctx.Tx
 

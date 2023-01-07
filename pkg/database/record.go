@@ -7,7 +7,7 @@ import (
 )
 
 type Record interface{}
-type Records []Record
+type Records[R Record] []R
 
 type Field string
 
@@ -33,22 +33,13 @@ func Values(r Record) []any {
 	return vs
 }
 
-func CopyWithNewKey(r Record, k entity.AutoGenKey) Record {
-	var rr Record
+func CopyWithNewKey[R Record](r R, k entity.AutoGenKey) R {
+	rr := r
 
-	switch r := r.(type) {
-	case entity.BadActor:
-		rr = r.Copy(k)
-	case entity.Credentials:
-		rr = r.Copy(k)
-	case entity.Leak:
-		rr = r.Copy(k)
-	case entity.Platform:
-		rr = r.Copy(k)
-	case entity.User:
-		rr = r.Copy(k)
-	default:
-		rr = r
+	copy := reflect.ValueOf(r).MethodByName("Copy")
+
+	if copy.IsValid() {
+		rr = copy.Call([]reflect.Value{reflect.ValueOf(k)})[0].Interface().(R)
 	}
 
 	return rr
