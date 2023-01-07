@@ -244,12 +244,15 @@ func (t DatabaseTable[R]) Name() string {
 
 func (t DatabaseTable[R]) Fields() []Field {
 	rs := t.Records
+	var fs []Field
 
 	if len(rs) > 0 {
-		return Fields(rs[0])
+		fs = Fields(rs[0])
 	} else {
-		return Fields(new(R))
+		fs = Fields(new(R))
 	}
+
+	return fs
 }
 
 func (pt PrimaryTable[R]) prepareInsertStatementString() string {

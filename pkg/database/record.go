@@ -36,10 +36,10 @@ func Values(r Record) []any {
 func CopyWithNewKey[R Record](r R, k entity.AutoGenKey) R {
 	rr := r
 
-	copy := reflect.ValueOf(r).MethodByName("Copy")
+	cc := reflect.ValueOf(r).MethodByName("Copy")
 
-	if copy.IsValid() {
-		rr = copy.Call([]reflect.Value{reflect.ValueOf(k)})[0].Interface().(R)
+	if cc.IsValid() {
+		rr = cc.Call([]reflect.Value{reflect.ValueOf(k)})[0].Interface().(R)
 	}
 
 	return rr

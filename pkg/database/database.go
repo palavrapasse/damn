@@ -172,13 +172,13 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp func() (R, []any), v ...a
 
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("could not complete transaction: %v", err)
+			err = fmt.Errorf("could not complete transaction: %w", err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			err = fmt.Errorf("could not rollback transaction: %v", err)
+			err = fmt.Errorf("could not rollback transaction: %w", err)
 		}
 	}()
 
@@ -202,7 +202,7 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp func() (R, []any), v ...a
 				err = rs.Scan(addrs...)
 
 				if err != nil {
-					return
+					break
 				} else {
 					rcs = append(rcs, r)
 				}
