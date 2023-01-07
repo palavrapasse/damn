@@ -23,7 +23,7 @@ type TransactionContext[R Record] struct {
 	Tx *sql.Tx
 }
 
-type TypedQueryResultMapper[R Record] func() (R, []any)
+type TypedQueryResultMapper[R Record] func() (*R, []any)
 type AnonymousErrorCallback func() (any, error)
 
 func NewDatabaseContext[R Record](fp string) (DatabaseContext[R], error) {
@@ -199,7 +199,7 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R]
 				return
 			}
 
-			rs, err = stmt.Query(v)
+			rs, err = stmt.Query(v...)
 
 			if err != nil {
 				return
@@ -213,7 +213,7 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R]
 				if err != nil {
 					break
 				} else {
-					rcs = append(rcs, r)
+					rcs = append(rcs, *r)
 				}
 			}
 		}()
