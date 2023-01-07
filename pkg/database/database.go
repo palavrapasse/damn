@@ -23,6 +23,7 @@ type TransactionContext[R Record] struct {
 	Tx *sql.Tx
 }
 
+type TypedQueryResultMapper[R Record] func() (R, []any)
 type AnonymousErrorCallback func() (any, error)
 
 func NewDatabaseContext[R Record](fp string) (DatabaseContext[R], error) {
@@ -44,15 +45,14 @@ func (ctx DatabaseContext[R]) NewTransactionContext() (TransactionContext[R], er
 	return TransactionContext[R]{Tx: tx}, err
 }
 
-func Convert[R Record, T User](ctx DatabaseContext[R]) DatabaseContext[T] {
-	return DatabaseContext[T]{}
+func Convert[R Record, T Record](ctx DatabaseContext[R]) DatabaseContext[T] {
+	return DatabaseContext[T]{
+		DB:       ctx.DB,
+		FilePath: ctx.FilePath,
+	}
 }
 
 func (ctx DatabaseContext[Record]) Insert(i Import) error {
-
-	// ctxd := Convert(ctx)
-
-	// ctxd.CustomQuery("", func() (User, []any) { return User{}, []any{} })
 
 	var tx *sql.Tx
 
@@ -167,7 +167,7 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 	return err
 }
 
-func (ctx DatabaseContext[R]) CustomQuery(q string, mp func() (R, []any), v ...any) ([]R, error) {
+func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R], v ...any) ([]R, error) {
 	var tctx TransactionContext[R]
 	var tx *sql.Tx
 	var rs *sql.Rows
