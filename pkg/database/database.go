@@ -221,9 +221,9 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R]
 
 				if err != nil {
 					break
-				} else {
-					rcs = append(rcs, *r)
 				}
+
+				rcs = append(rcs, *r)
 			}
 		}()
 	}
