@@ -6,7 +6,6 @@ import (
 	"reflect"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/palavrapasse/damn/internal"
 	. "github.com/palavrapasse/damn/pkg/entity"
 )
 
@@ -59,13 +58,13 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			internal.Aspirador.Error(fmt.Sprintf("could not complete transaction: %v", err))
+			err = fmt.Errorf("could not complete transaction: %w", err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			internal.Aspirador.Error(fmt.Sprintf("could not rollback transaction: %v", err))
+			err = fmt.Errorf("could not rollback transaction: %w", err)
 		}
 	}()
 
