@@ -39,6 +39,16 @@ type DatabaseTable[R Record] struct {
 type PrimaryTable[R Record] DatabaseTable[R]
 type ForeignTable[R Record] DatabaseTable[R]
 
+func MultiplePlaceholder(lv int) string {
+	phs := make([]string, lv)
+
+	for i := 0; i < lv; i++ {
+		phs[i] = prepareStatementPlaceholderSymbol
+	}
+
+	return strings.Join(phs, prepareStatementMultipleFieldsSeparator)
+}
+
 func NewBadActorTable(ba []BadActor) PrimaryTable[BadActor] {
 	return PrimaryTable[BadActor]{
 		Records: ba,

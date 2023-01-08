@@ -1,11 +1,45 @@
 package database
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	. "github.com/palavrapasse/damn/pkg/entity"
 )
+
+func TestMultiplePlaceholderReturnsEmptyStringIfValueCountIsZero(t *testing.T) {
+	lv := 0
+
+	mph := MultiplePlaceholder(lv)
+	emph := ""
+
+	if mph != emph {
+		t.Fatalf("function should have returned (%s), but got: (%s)", mph, emph)
+	}
+}
+
+func TestMultiplePlaceholderReturnsSinglePlaceholderIfValueCountIsOne(t *testing.T) {
+	lv := 1
+
+	mph := MultiplePlaceholder(lv)
+	emph := prepareStatementPlaceholderSymbol
+
+	if mph != emph {
+		t.Fatalf("function should have returned (%s), but got: (%s)", mph, emph)
+	}
+}
+
+func TestMultiplePlaceholderReturnsMultiplePlaceholderIfValueCountIsMoreThanOne(t *testing.T) {
+	lv := 3
+
+	mph := MultiplePlaceholder(lv)
+	emph := fmt.Sprintf("%s, %s, %s", prepareStatementPlaceholderSymbol, prepareStatementPlaceholderSymbol, prepareStatementPlaceholderSymbol)
+
+	if mph != emph {
+		t.Fatalf("function should have returned (%s), but got: (%s)", mph, emph)
+	}
+}
 
 func TestBadActorTableNameReturnsBadActor(t *testing.T) {
 	tb := NewBadActorTable([]BadActor{})
