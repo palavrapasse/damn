@@ -3,10 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"reflect"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/palavrapasse/damn/internal"
 	. "github.com/palavrapasse/damn/pkg/entity"
 )
 
@@ -59,13 +59,13 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			log.Printf("could not complete transaction: %v", err)
+			internal.Aspirador.Error(fmt.Sprintf("could not complete transaction: %v", err))
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			log.Printf("could not rollback transaction: %v", err)
+			internal.Aspirador.Error(fmt.Sprintf("could not rollback transaction: %v", err))
 		}
 	}()
 
@@ -99,7 +99,6 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[Leak](tctx), NewLeakTable(i.Leak))
 			},
-
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[Platform](tctx), NewPlatformTable(i.AffectedPlatforms))
 			},
