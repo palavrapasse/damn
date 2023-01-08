@@ -167,6 +167,15 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 	return err
 }
 
+// Execute a query that can be customized using prepared statements. Consumers must provide a typed callback
+// that shall return each row result mapped as a pointer to a struct.
+//
+// An example of a call would be:
+//
+//	ctx.CustomQuery("SELECT * FROM User WHERE email = ?", func() (*User, []any) {
+//			u := User{}
+//			return u, []any{&u.UserId, &u.Email}
+//		}, email)
 func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R], v ...any) ([]R, error) {
 	var tctx TransactionContext[R]
 	var tx *sql.Tx
