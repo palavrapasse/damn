@@ -39,17 +39,14 @@ func NewDatabaseContext[R Record](fp string) (DatabaseContext[R], error) {
 	}, err
 }
 
+func Convert[R Record, T Record](ctx DatabaseContext[R]) DatabaseContext[T] {
+	return DatabaseContext[T](ctx)
+}
+
 func (ctx DatabaseContext[R]) NewTransactionContext() (TransactionContext[R], error) {
 	tx, err := ctx.DB.Begin()
 
 	return TransactionContext[R]{Tx: tx}, err
-}
-
-func Convert[R Record, T Record](ctx DatabaseContext[R]) DatabaseContext[T] {
-	return DatabaseContext[T]{
-		DB:       ctx.DB,
-		FilePath: ctx.FilePath,
-	}
 }
 
 func (ctx DatabaseContext[Record]) Insert(i Import) error {
