@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"reflect"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -59,13 +58,13 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			log.Printf("could not complete transaction: %v", err)
+			err = fmt.Errorf("could not complete transaction: %w", err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			log.Printf("could not rollback transaction: %v", err)
+			err = fmt.Errorf("could not rollback transaction: %w", err)
 		}
 	}()
 
@@ -99,7 +98,6 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[Leak](tctx), NewLeakTable(i.Leak))
 			},
-
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[Platform](tctx), NewPlatformTable(i.AffectedPlatforms))
 			},
