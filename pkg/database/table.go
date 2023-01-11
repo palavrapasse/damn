@@ -15,6 +15,11 @@ const (
 	prepareStatementMultipleFieldsSeparator = ", "
 )
 
+const (
+	AscendingSortOrderKeyword  = "ASC"
+	DescendingSortOrderKeyword = "DESC"
+)
+
 type Table[R Record] interface {
 	Name() string
 	Records() []R
