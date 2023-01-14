@@ -15,6 +15,11 @@ const (
 	_sqliteDriverName = "sqlite3"
 )
 
+const (
+	errorMessageCompleteTransaction = "could not complete transaction: %w"
+	errorMessageRollbackTransaction = "could not rollback transaction: %w"
+)
+
 type DatabaseContext[R Record] struct {
 	DB       *sql.DB
 	FilePath string
@@ -60,13 +65,13 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("could not complete transaction: %w", err)
+			err = fmt.Errorf(errorMessageCompleteTransaction, err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			err = fmt.Errorf("could not rollback transaction: %w", err)
+			err = fmt.Errorf(errorMessageRollbackTransaction, err)
 		}
 	}()
 
@@ -174,13 +179,13 @@ func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
 
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("could not complete transaction: %w", err)
+			err = fmt.Errorf(errorMessageCompleteTransaction, err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			err = fmt.Errorf("could not rollback transaction: %w", err)
+			err = fmt.Errorf(errorMessageRollbackTransaction, err)
 		}
 	}()
 
@@ -261,13 +266,13 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R]
 
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("could not complete transaction: %w", err)
+			err = fmt.Errorf(errorMessageCompleteTransaction, err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			err = fmt.Errorf("could not rollback transaction: %w", err)
+			err = fmt.Errorf(errorMessageRollbackTransaction, err)
 		}
 	}()
 
