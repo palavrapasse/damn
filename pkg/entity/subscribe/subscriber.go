@@ -12,9 +12,9 @@ type Subscriber struct {
 	SubscriberId entity.AutoGenKey
 }
 
-func NewSubscriber(emailB64 string) Subscriber {
+func NewSubscriber(email string) Subscriber {
 	return Subscriber{
-		B64Email: entity.NewBase64(emailB64),
+		B64Email: entity.NewBase64(email),
 	}
 }
 
