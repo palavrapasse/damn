@@ -92,7 +92,7 @@ func NewSubscriberTable(su ...Subscriber) PrimaryTable[Subscriber] {
 	}
 }
 
-func NewAffectedTable(af ...Affected) PrimaryTable[Affected] {
+func NewAffectedTable(af []Affected) PrimaryTable[Affected] {
 	return PrimaryTable[Affected]{
 		Records: af,
 	}

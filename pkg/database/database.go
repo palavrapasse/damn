@@ -8,6 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	. "github.com/palavrapasse/damn/pkg/entity"
 	. "github.com/palavrapasse/damn/pkg/entity/query"
+	. "github.com/palavrapasse/damn/pkg/entity/subscribe"
 )
 
 const (
@@ -146,6 +147,80 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 			},
 			func() (any, error) {
 				return typedInsertForeign(TransactionContext[UserCredentials](tctx), NewUserCredentialsTable(afu))
+			},
+		}
+
+		_, err = returnOnCallbackError(cbs)
+
+		if err != nil {
+			return
+		}
+	}()
+
+	if err == nil {
+		err = tx.Commit()
+	}
+
+	return err
+}
+
+func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
+
+	var tx *sql.Tx
+
+	tctx, err := ctx.NewTransactionContext()
+
+	tx = tctx.Tx
+
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("could not complete transaction: %w", err)
+
+			err = tx.Rollback()
+		}
+
+		if err != nil {
+			err = fmt.Errorf("could not rollback transaction: %w", err)
+		}
+	}()
+
+	func() {
+		sub := s.Subscriber
+		aff := make([]Affected, len(s.Affected))
+
+		// Primary first
+
+		var pts []any
+
+		cbs := []AnonymousErrorCallback{
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Subscriber](tctx), NewSubscriberTable(sub))
+			},
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Affected](tctx), NewAffectedTable(aff))
+			},
+		}
+
+		pts, err = returnOnCallbackError(cbs)
+
+		if err != nil {
+			return
+		}
+
+		// Foreign now
+
+		sub = pts[0].(PrimaryTable[Subscriber]).Records[0]
+		aff = pts[1].(PrimaryTable[Affected]).Records
+
+		subaff := map[Subscriber]Affected{}
+
+		for k := range aff {
+			subaff[sub] = aff[k]
+		}
+
+		cbs = []AnonymousErrorCallback{
+			func() (any, error) {
+				return typedInsertForeign(TransactionContext[SubscriberAffected](tctx), NewSubscriberAffectedTable(subaff))
 			},
 		}
 
@@ -347,7 +422,7 @@ func (ctx TransactionContext[R]) insertForeign(t ForeignTable[R]) (ForeignTable[
 	return t.Copy(updatedRecords), err
 }
 
-func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
+func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User | Subscriber | Affected](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
 	tctx := TransactionContext[R]{Tx: ctx.Tx}
 
 	tu, err := tctx.insertPrimary(t)
@@ -359,7 +434,7 @@ func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User
 	return tu, err
 }
 
-func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
+func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials | SubscriberAffected](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
 	return ctx.insertForeign(t)
 }
 
