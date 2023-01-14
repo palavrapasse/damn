@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	. "github.com/palavrapasse/damn/pkg/entity"
+	. "github.com/palavrapasse/damn/pkg/entity/query"
 )
 
 const (

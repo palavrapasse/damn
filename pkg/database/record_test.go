@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/palavrapasse/damn/pkg/entity"
+	. "github.com/palavrapasse/damn/pkg/entity/query"
 )
 
 func TestValuesReturnsSchemaValuesIfRecordIsBadActor(t *testing.T) {
-	r := entity.BadActor{BaId: 1, Identifier: "l33t"}
+	r := BadActor{BaId: 1, Identifier: "l33t"}
 
 	expectedValues := []any{r.BaId, r.Identifier}
 
@@ -20,7 +21,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsBadActor(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsCredentials(t *testing.T) {
-	r := entity.Credentials{CredId: 1, Password: "my.password"}
+	r := Credentials{CredId: 1, Password: "my.password"}
 
 	expectedValues := []any{r.CredId, r.Password}
 
@@ -32,7 +33,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsCredentials(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsHashCredentials(t *testing.T) {
-	r := entity.HashCredentials{CredId: 1, HSHA256: entity.NewHSHA256("my.password")}
+	r := HashCredentials{CredId: 1, HSHA256: entity.NewHSHA256("my.password")}
 
 	expectedValues := []any{r.CredId, r.HSHA256}
 
@@ -44,7 +45,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsHashCredentials(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsHashUser(t *testing.T) {
-	r := entity.HashUser{UserId: 1, HSHA256: entity.NewHSHA256("my.email@gmail.com")}
+	r := HashUser{UserId: 1, HSHA256: entity.NewHSHA256("my.email@gmail.com")}
 
 	expectedValues := []any{r.UserId, r.HSHA256}
 
@@ -56,7 +57,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsHashUser(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsLeakBadActor(t *testing.T) {
-	r := entity.LeakBadActor{BaId: 1, LeakId: 2}
+	r := LeakBadActor{BaId: 1, LeakId: 2}
 
 	expectedValues := []any{r.BaId, r.LeakId}
 
@@ -68,7 +69,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsLeakBadActor(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsLeakCredentials(t *testing.T) {
-	r := entity.LeakCredentials{CredId: 1, LeakId: 2}
+	r := LeakCredentials{CredId: 1, LeakId: 2}
 
 	expectedValues := []any{r.CredId, r.LeakId}
 
@@ -80,7 +81,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsLeakCredentials(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsLeakPlatform(t *testing.T) {
-	r := entity.LeakPlatform{PlatId: 1, LeakId: 2}
+	r := LeakPlatform{PlatId: 1, LeakId: 2}
 
 	expectedValues := []any{r.PlatId, r.LeakId}
 
@@ -92,7 +93,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsLeakPlatform(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsLeak(t *testing.T) {
-	r := entity.Leak{LeakId: 1, ShareDateSC: entity.DateInSeconds(2), Context: "twitter breach"}
+	r := Leak{LeakId: 1, ShareDateSC: DateInSeconds(2), Context: "twitter breach"}
 
 	expectedValues := []any{r.LeakId, r.ShareDateSC, r.Context}
 
@@ -104,7 +105,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsLeak(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsLeakUser(t *testing.T) {
-	r := entity.LeakUser{UserId: 1, LeakId: 2}
+	r := LeakUser{UserId: 1, LeakId: 2}
 
 	expectedValues := []any{r.UserId, r.LeakId}
 
@@ -116,7 +117,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsLeakUser(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsPlatform(t *testing.T) {
-	r := entity.Platform{PlatId: 1, Name: "twitter"}
+	r := Platform{PlatId: 1, Name: "twitter"}
 
 	expectedValues := []any{r.PlatId, r.Name}
 
@@ -128,7 +129,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsPlatform(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsUserCredentials(t *testing.T) {
-	r := entity.UserCredentials{CredId: 1, UserId: 2}
+	r := UserCredentials{CredId: 1, UserId: 2}
 
 	expectedValues := []any{r.CredId, r.UserId}
 
@@ -140,7 +141,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsUserCredentials(t *testing.T) {
 }
 
 func TestValuesReturnsSchemaValuesIfRecordIsUser(t *testing.T) {
-	r := entity.User{UserId: 1, Email: "my.email@gmail.com"}
+	r := User{UserId: 1, Email: "my.email@gmail.com"}
 
 	expectedValues := []any{r.UserId, r.Email}
 
@@ -152,7 +153,7 @@ func TestValuesReturnsSchemaValuesIfRecordIsUser(t *testing.T) {
 }
 
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsBadActor(t *testing.T) {
-	r := entity.BadActor{}
+	r := BadActor{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r.Copy(k)
 
@@ -164,7 +165,7 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsBadActor(t *testi
 }
 
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsCredentials(t *testing.T) {
-	r := entity.Credentials{}
+	r := Credentials{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r.Copy(k)
 
@@ -176,7 +177,7 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsCredentials(t *te
 }
 
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsLeak(t *testing.T) {
-	r := entity.Leak{}
+	r := Leak{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r.Copy(k)
 
@@ -188,7 +189,7 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsLeak(t *testing.T
 }
 
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsPlatform(t *testing.T) {
-	r := entity.Platform{}
+	r := Platform{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r.Copy(k)
 
@@ -200,7 +201,7 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsPlatform(t *testi
 }
 
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsUser(t *testing.T) {
-	r := entity.User{}
+	r := User{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r.Copy(k)
 
@@ -212,7 +213,7 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsUser(t *testing.T
 }
 
 func TestCopyWithNewKeyReturnsSameRecordIfRecordIsNotPrimary(t *testing.T) {
-	r := entity.LeakCredentials{}
+	r := LeakCredentials{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r
 

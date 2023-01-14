@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	. "github.com/palavrapasse/damn/pkg/entity"
+	. "github.com/palavrapasse/damn/pkg/entity/query"
 )
 
 func TestMultiplePlaceholderReturnsEmptyStringIfValueCountIsZero(t *testing.T) {

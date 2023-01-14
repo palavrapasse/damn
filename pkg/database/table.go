@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	. "github.com/palavrapasse/damn/pkg/entity"
+	. "github.com/palavrapasse/damn/pkg/entity/query"
 )
 
 const (
