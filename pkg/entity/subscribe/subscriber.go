@@ -8,13 +8,13 @@ const (
 )
 
 type Subscriber struct {
-	B64Email     string
+	B64Email     entity.Base64
 	SubscriberId entity.AutoGenKey
 }
 
 func NewSubscriber(emailB64 string) Subscriber {
 	return Subscriber{
-		B64Email: emailB64,
+		B64Email: entity.NewBase64(emailB64),
 	}
 }
 
