@@ -27,7 +27,7 @@ func (s Subscriber) Copy(key entity.AutoGenKey) Subscriber {
 
 func (s Subscriber) Record() []entity.Tuple {
 	return []entity.Tuple{
-		entity.NewTuple(AffectedIdField, s.SubscriberId),
-		entity.NewTuple(AffectedHashEmailField, s.B64Email),
+		entity.NewTuple(SubscriberIdField, s.SubscriberId),
+		entity.NewTuple(SubscriberB64EmailField, s.B64Email),
 	}
 }
