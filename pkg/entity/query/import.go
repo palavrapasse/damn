@@ -1,4 +1,4 @@
-package entity
+package query
 
 type Import struct {
 	AffectedUsers     map[User]Credentials

@@ -1,4 +1,4 @@
-package entity
+package query
 
 import (
 	"testing"

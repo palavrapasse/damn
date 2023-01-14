@@ -1,8 +1,10 @@
-package entity
+package query
 
 import (
 	"errors"
 	"strings"
+
+	"github.com/palavrapasse/damn/pkg/entity"
 )
 
 const (
@@ -14,7 +16,7 @@ type Password string
 
 type Credentials struct {
 	Password Password
-	CredId   AutoGenKey
+	CredId   entity.AutoGenKey
 }
 
 func NewPassword(password string) (Password, error) {
@@ -36,17 +38,17 @@ func NewCredentials(password Password) Credentials {
 	}
 }
 
-func (c Credentials) Copy(key AutoGenKey) Credentials {
+func (c Credentials) Copy(key entity.AutoGenKey) Credentials {
 	return Credentials{
 		CredId:   key,
 		Password: c.Password,
 	}
 }
 
-func (c Credentials) Record() []Tuple {
-	return []Tuple{
-		NewTuple(CredentialsIdField, c.CredId),
-		NewTuple(CredentialsPasswordField, c.Password),
+func (c Credentials) Record() []entity.Tuple {
+	return []entity.Tuple{
+		entity.NewTuple(CredentialsIdField, c.CredId),
+		entity.NewTuple(CredentialsPasswordField, c.Password),
 	}
 }
 
