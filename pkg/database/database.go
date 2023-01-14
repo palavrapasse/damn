@@ -191,7 +191,7 @@ func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
 
 	func() {
 		sub := s.Subscriber
-		aff := make([]Affected, len(s.Affected))
+		aff := s.Affected
 
 		// Primary first
 
@@ -217,22 +217,24 @@ func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
 		sub = pts[0].(PrimaryTable[Subscriber]).Records[0]
 		aff = pts[1].(PrimaryTable[Affected]).Records
 
-		subaff := map[Subscriber]Affected{}
+		if len(aff) > 0 {
+			subaff := map[Subscriber]Affected{}
 
-		for k := range aff {
-			subaff[sub] = aff[k]
-		}
+			for k := range aff {
+				subaff[sub] = aff[k]
+			}
 
-		cbs = []AnonymousErrorCallback{
-			func() (any, error) {
-				return typedInsertForeign(TransactionContext[SubscriberAffected](tctx), NewSubscriberAffectedTable(subaff))
-			},
-		}
+			cbs = []AnonymousErrorCallback{
+				func() (any, error) {
+					return typedInsertForeign(TransactionContext[SubscriberAffected](tctx), NewSubscriberAffectedTable(subaff))
+				},
+			}
 
-		_, err = returnOnCallbackError(cbs)
+			_, err = returnOnCallbackError(cbs)
 
-		if err != nil {
-			return
+			if err != nil {
+				return
+			}
 		}
 	}()
 
