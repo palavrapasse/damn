@@ -7,6 +7,7 @@ import (
 
 	. "github.com/palavrapasse/damn/pkg/entity"
 	. "github.com/palavrapasse/damn/pkg/entity/query"
+	. "github.com/palavrapasse/damn/pkg/entity/subscribe"
 )
 
 const (
@@ -82,6 +83,18 @@ func NewPlatformTable(ps []Platform) PrimaryTable[Platform] {
 func NewUserTable(us []User) PrimaryTable[User] {
 	return PrimaryTable[User]{
 		Records: us,
+	}
+}
+
+func NewSubscriberTable(su ...Subscriber) PrimaryTable[Subscriber] {
+	return PrimaryTable[Subscriber]{
+		Records: su,
+	}
+}
+
+func NewAffectedTable(af ...Affected) PrimaryTable[Affected] {
+	return PrimaryTable[Affected]{
+		Records: af,
 	}
 }
 
@@ -177,6 +190,22 @@ func NewUserCredentialsTable(uc map[User]Credentials) ForeignTable[UserCredentia
 	}
 
 	return ForeignTable[UserCredentials]{
+		Records: rs,
+	}
+}
+
+func NewSubscriberAffectedTable(sa map[Subscriber]Affected) ForeignTable[SubscriberAffected] {
+	rs := make(Records[SubscriberAffected], len(sa))
+
+	i := 0
+
+	for s, a := range sa {
+		rs[i] = SubscriberAffected{AffId: a.AffectedId, SubId: s.SubscriberId}
+
+		i++
+	}
+
+	return ForeignTable[SubscriberAffected]{
 		Records: rs,
 	}
 }
