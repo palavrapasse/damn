@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	. "github.com/palavrapasse/damn/pkg/entity/query"
+	. "github.com/palavrapasse/damn/pkg/entity/subscribe"
 )
 
 func TestMultiplePlaceholderReturnsEmptyStringIfValueCountIsZero(t *testing.T) {
@@ -165,6 +166,39 @@ func TestUserCredentialsTableNameReturnsUserCredentials(t *testing.T) {
 func TestUserTableNameReturnsUser(t *testing.T) {
 	tb := NewUserTable([]User{})
 	expectedTableName := "User"
+
+	name := tb.Name()
+
+	if name != expectedTableName {
+		t.Fatalf("User table name in database is %s, but Name() returned: %s", expectedTableName, name)
+	}
+}
+
+func TestSubscriberTableNameReturnsSubscriber(t *testing.T) {
+	tb := NewSubscriberTable(Subscriber{})
+	expectedTableName := "Subscriber"
+
+	name := tb.Name()
+
+	if name != expectedTableName {
+		t.Fatalf("User table name in database is %s, but Name() returned: %s", expectedTableName, name)
+	}
+}
+
+func TestAffectedTableNameReturnsAffected(t *testing.T) {
+	tb := NewAffectedTable([]Affected{})
+	expectedTableName := "Affected"
+
+	name := tb.Name()
+
+	if name != expectedTableName {
+		t.Fatalf("User table name in database is %s, but Name() returned: %s", expectedTableName, name)
+	}
+}
+
+func TestSubscriberAffectedTableNameReturnsSubscriberAffected(t *testing.T) {
+	tb := NewSubscriberAffectedTable(map[Subscriber]Affected{})
+	expectedTableName := "SubscriberAffected"
 
 	name := tb.Name()
 

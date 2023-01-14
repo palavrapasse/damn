@@ -6,6 +6,7 @@ import (
 
 	"github.com/palavrapasse/damn/pkg/entity"
 	. "github.com/palavrapasse/damn/pkg/entity/query"
+	. "github.com/palavrapasse/damn/pkg/entity/subscribe"
 )
 
 func TestValuesReturnsSchemaValuesIfRecordIsBadActor(t *testing.T) {
@@ -152,6 +153,42 @@ func TestValuesReturnsSchemaValuesIfRecordIsUser(t *testing.T) {
 	}
 }
 
+func TestValuesReturnsSchemaValuesIfRecordIsSubscriber(t *testing.T) {
+	r := Subscriber{SubscriberId: 1, B64Email: "base64Email"}
+
+	expectedValues := []any{r.SubscriberId, r.B64Email}
+
+	values := Values(r)
+
+	if !reflect.DeepEqual(values, expectedValues) {
+		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
+	}
+}
+
+func TestValuesReturnsSchemaValuesIfRecordIsAffected(t *testing.T) {
+	r := Affected{AffectedId: 1, HSHA256Email: entity.NewHSHA256("Email")}
+
+	expectedValues := []any{r.AffectedId, r.HSHA256Email}
+
+	values := Values(r)
+
+	if !reflect.DeepEqual(values, expectedValues) {
+		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
+	}
+}
+
+func TestValuesReturnsSchemaValuesIfRecordIsSubscriberAffected(t *testing.T) {
+	r := SubscriberAffected{AffId: 1, SubId: 2}
+
+	expectedValues := []any{r.AffId, r.SubId}
+
+	values := Values(r)
+
+	if !reflect.DeepEqual(values, expectedValues) {
+		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
+	}
+}
+
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsBadActor(t *testing.T) {
 	r := BadActor{}
 	k := entity.AutoGenKey(500)
@@ -202,6 +239,30 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsPlatform(t *testi
 
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsUser(t *testing.T) {
 	r := User{}
+	k := entity.AutoGenKey(500)
+	expectedRecord := r.Copy(k)
+
+	copyRecord := CopyWithNewKey(r, k)
+
+	if copyRecord != expectedRecord {
+		t.Fatalf("CopyWithNewKey should have set auto gen key via Copy method, but match failed: %v\n", copyRecord)
+	}
+}
+
+func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsSubscriber(t *testing.T) {
+	r := Subscriber{}
+	k := entity.AutoGenKey(500)
+	expectedRecord := r.Copy(k)
+
+	copyRecord := CopyWithNewKey(r, k)
+
+	if copyRecord != expectedRecord {
+		t.Fatalf("CopyWithNewKey should have set auto gen key via Copy method, but match failed: %v\n", copyRecord)
+	}
+}
+
+func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsAffected(t *testing.T) {
+	r := Affected{}
 	k := entity.AutoGenKey(500)
 	expectedRecord := r.Copy(k)
 
