@@ -1,4 +1,4 @@
-package entity
+package query
 
 func panicOnError(err error) {
 	if err != nil {

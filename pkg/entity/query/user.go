@@ -1,9 +1,11 @@
-package entity
+package query
 
 import (
 	"errors"
 	"net/mail"
 	"strings"
+
+	"github.com/palavrapasse/damn/pkg/entity"
 )
 
 const (
@@ -15,7 +17,7 @@ type Email string
 
 type User struct {
 	Email  Email
-	UserId AutoGenKey
+	UserId entity.AutoGenKey
 }
 
 func NewUser(email string) (User, error) {
@@ -33,17 +35,17 @@ func NewUser(email string) (User, error) {
 	return u, err
 }
 
-func (u User) Copy(key AutoGenKey) User {
+func (u User) Copy(key entity.AutoGenKey) User {
 	return User{
 		UserId: key,
 		Email:  u.Email,
 	}
 }
 
-func (u User) Record() []Tuple {
-	return []Tuple{
-		NewTuple(UserIdField, u.UserId),
-		NewTuple(UserEmailField, u.Email),
+func (u User) Record() []entity.Tuple {
+	return []entity.Tuple{
+		entity.NewTuple(UserIdField, u.UserId),
+		entity.NewTuple(UserEmailField, u.Email),
 	}
 }
 

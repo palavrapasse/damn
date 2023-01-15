@@ -1,8 +1,10 @@
-package entity
+package query
 
 import (
 	"errors"
 	"strings"
+
+	"github.com/palavrapasse/damn/pkg/entity"
 )
 
 const (
@@ -12,7 +14,7 @@ const (
 
 type BadActor struct {
 	Identifier string
-	BaId       AutoGenKey
+	BaId       entity.AutoGenKey
 }
 
 func NewBadActor(identifier string) (BadActor, error) {
@@ -30,14 +32,14 @@ func NewBadActor(identifier string) (BadActor, error) {
 	return ba, err
 }
 
-func (ba BadActor) Record() []Tuple {
-	return []Tuple{
-		NewTuple(BadActorIdField, ba.BaId),
-		NewTuple(BadActorIdentifierField, ba.Identifier),
+func (ba BadActor) Record() []entity.Tuple {
+	return []entity.Tuple{
+		entity.NewTuple(BadActorIdField, ba.BaId),
+		entity.NewTuple(BadActorIdentifierField, ba.Identifier),
 	}
 }
 
-func (ba BadActor) Copy(key AutoGenKey) BadActor {
+func (ba BadActor) Copy(key entity.AutoGenKey) BadActor {
 	return BadActor{
 		BaId:       key,
 		Identifier: ba.Identifier,

@@ -7,10 +7,17 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	. "github.com/palavrapasse/damn/pkg/entity"
+	. "github.com/palavrapasse/damn/pkg/entity/query"
+	. "github.com/palavrapasse/damn/pkg/entity/subscribe"
 )
 
 const (
 	_sqliteDriverName = "sqlite3"
+)
+
+const (
+	errorMessageCompleteTransaction = "could not complete transaction: %w"
+	errorMessageRollbackTransaction = "could not rollback transaction: %w"
 )
 
 type DatabaseContext[R Record] struct {
@@ -58,13 +65,13 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("could not complete transaction: %w", err)
+			err = fmt.Errorf(errorMessageCompleteTransaction, err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			err = fmt.Errorf("could not rollback transaction: %w", err)
+			err = fmt.Errorf(errorMessageRollbackTransaction, err)
 		}
 	}()
 
@@ -162,6 +169,82 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 	return err
 }
 
+func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
+
+	var tx *sql.Tx
+
+	tctx, err := ctx.NewTransactionContext()
+
+	tx = tctx.Tx
+
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf(errorMessageCompleteTransaction, err)
+
+			err = tx.Rollback()
+		}
+
+		if err != nil {
+			err = fmt.Errorf(errorMessageRollbackTransaction, err)
+		}
+	}()
+
+	func() {
+		sub := s.Subscriber
+		aff := s.Affected
+
+		// Primary first
+
+		var pts []any
+
+		cbs := []AnonymousErrorCallback{
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Subscriber](tctx), NewSubscriberTable(sub))
+			},
+			func() (any, error) {
+				return typedInsertAndFindPrimary(TransactionContext[Affected](tctx), NewAffectedTable(aff))
+			},
+		}
+
+		pts, err = returnOnCallbackError(cbs)
+
+		if err != nil {
+			return
+		}
+
+		// Foreign now
+
+		sub = pts[0].(PrimaryTable[Subscriber]).Records[0]
+		aff = pts[1].(PrimaryTable[Affected]).Records
+
+		if len(aff) > 0 {
+			subaff := map[Subscriber]Affected{}
+
+			for k := range aff {
+				subaff[sub] = aff[k]
+			}
+
+			cbs = []AnonymousErrorCallback{
+				func() (any, error) {
+					return typedInsertForeign(TransactionContext[SubscriberAffected](tctx), NewSubscriberAffectedTable(subaff))
+				},
+			}
+
+			_, err = returnOnCallbackError(cbs)
+
+			if err != nil {
+				return
+			}
+		}
+	}()
+
+	if err == nil {
+		err = tx.Commit()
+	}
+
+	return err
+}
+
 // Execute a query that can be customized using prepared statements. Consumers must provide a typed callback
 // that shall return each row result mapped as a pointer to a struct.
 //
@@ -185,13 +268,13 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R]
 
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("could not complete transaction: %w", err)
+			err = fmt.Errorf(errorMessageCompleteTransaction, err)
 
 			err = tx.Rollback()
 		}
 
 		if err != nil {
-			err = fmt.Errorf("could not rollback transaction: %w", err)
+			err = fmt.Errorf(errorMessageRollbackTransaction, err)
 		}
 	}()
 
@@ -346,7 +429,7 @@ func (ctx TransactionContext[R]) insertForeign(t ForeignTable[R]) (ForeignTable[
 	return t.Copy(updatedRecords), err
 }
 
-func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
+func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User | Subscriber | Affected](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
 	tctx := TransactionContext[R]{Tx: ctx.Tx}
 
 	tu, err := tctx.insertPrimary(t)
@@ -358,7 +441,7 @@ func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User
 	return tu, err
 }
 
-func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
+func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials | SubscriberAffected](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
 	return ctx.insertForeign(t)
 }
 

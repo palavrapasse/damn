@@ -1,8 +1,10 @@
-package entity
+package query
 
 import (
 	"errors"
 	"strings"
+
+	"github.com/palavrapasse/damn/pkg/entity"
 )
 
 const (
@@ -16,7 +18,7 @@ type Context string
 type Leak struct {
 	Context     Context
 	ShareDateSC DateInSeconds
-	LeakId      AutoGenKey
+	LeakId      entity.AutoGenKey
 }
 
 func NewLeak(context string, shareDateSC DateInSeconds) (Leak, error) {
@@ -35,7 +37,7 @@ func NewLeak(context string, shareDateSC DateInSeconds) (Leak, error) {
 	return l, err
 }
 
-func (l Leak) Copy(key AutoGenKey) Leak {
+func (l Leak) Copy(key entity.AutoGenKey) Leak {
 	return Leak{
 		LeakId:      key,
 		ShareDateSC: l.ShareDateSC,
@@ -43,11 +45,11 @@ func (l Leak) Copy(key AutoGenKey) Leak {
 	}
 }
 
-func (l Leak) Record() []Tuple {
-	return []Tuple{
-		NewTuple(LeakIdField, l.LeakId),
-		NewTuple(LeakShareDateSCField, l.ShareDateSC),
-		NewTuple(LeakContextField, l.Context),
+func (l Leak) Record() []entity.Tuple {
+	return []entity.Tuple{
+		entity.NewTuple(LeakIdField, l.LeakId),
+		entity.NewTuple(LeakShareDateSCField, l.ShareDateSC),
+		entity.NewTuple(LeakContextField, l.Context),
 	}
 }
 
