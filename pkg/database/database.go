@@ -218,15 +218,9 @@ func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
 		aff = pts[1].(PrimaryTable[Affected]).Records
 
 		if len(aff) > 0 {
-			subaff := map[Subscriber]Affected{}
-
-			for k := range aff {
-				subaff[sub] = aff[k]
-			}
-
 			cbs = []AnonymousErrorCallback{
 				func() (any, error) {
-					return typedInsertForeign(TransactionContext[SubscriberAffected](tctx), NewSubscriberAffectedTable(subaff))
+					return typedInsertForeign(TransactionContext[SubscriberAffected](tctx), NewSubscriberAffectedTable(sub, aff))
 				},
 			}
 
