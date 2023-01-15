@@ -194,15 +194,11 @@ func NewUserCredentialsTable(uc map[User]Credentials) ForeignTable[UserCredentia
 	}
 }
 
-func NewSubscriberAffectedTable(sa map[Subscriber]Affected) ForeignTable[SubscriberAffected] {
-	rs := make(Records[SubscriberAffected], len(sa))
+func NewSubscriberAffectedTable(s Subscriber, a []Affected) ForeignTable[SubscriberAffected] {
+	rs := make(Records[SubscriberAffected], len(a))
 
-	i := 0
-
-	for s, a := range sa {
-		rs[i] = SubscriberAffected{AffId: a.AffectedId, SubId: s.SubscriberId}
-
-		i++
+	for i, aff := range a {
+		rs[i] = SubscriberAffected{AffId: aff.AffectedId, SubId: s.SubscriberId}
 	}
 
 	return ForeignTable[SubscriberAffected]{

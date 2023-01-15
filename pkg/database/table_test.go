@@ -197,7 +197,7 @@ func TestAffectedTableNameReturnsAffected(t *testing.T) {
 }
 
 func TestSubscriberAffectedTableNameReturnsSubscriberAffected(t *testing.T) {
-	tb := NewSubscriberAffectedTable(map[Subscriber]Affected{})
+	tb := NewSubscriberAffectedTable(Subscriber{}, []Affected{})
 	expectedTableName := "SubscriberAffected"
 
 	name := tb.Name()
