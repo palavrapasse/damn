@@ -297,7 +297,13 @@ func (ctx DatabaseContext[R]) CustomQuery(q string, mp TypedQueryResultMapper[R]
 
 				rcs = append(rcs, *r)
 			}
+
+			defer rs.Close()
 		}()
+	}
+
+	if err == nil {
+		err = tx.Commit()
 	}
 
 	return rcs, err
