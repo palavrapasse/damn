@@ -55,7 +55,7 @@ func (ctx DatabaseContext[R]) NewTransactionContext() (TransactionContext[R], er
 	return TransactionContext[R]{Tx: tx}, err
 }
 
-func (ctx DatabaseContext[Record]) Insert(i Import) error {
+func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 
 	var tx *sql.Tx
 
@@ -74,6 +74,8 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 			err = fmt.Errorf(errorMessageRollbackTransaction, err)
 		}
 	}()
+
+	var leakId AutoGenKey
 
 	func() {
 		us := make([]User, len(i.AffectedUsers))
@@ -125,6 +127,7 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 		ps := pts[4].(PrimaryTable[Platform]).Records
 
 		l := ls[0]
+		leakId = l.LeakId
 		afu := map[User]Credentials{}
 
 		for k := range us {
@@ -166,7 +169,7 @@ func (ctx DatabaseContext[Record]) Insert(i Import) error {
 		err = tx.Commit()
 	}
 
-	return err
+	return leakId, err
 }
 
 func (ctx DatabaseContext[Record]) InsertSubscription(s Subscription) error {
