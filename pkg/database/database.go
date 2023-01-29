@@ -3,9 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"math"
 	"reflect"
-	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 	. "github.com/palavrapasse/damn/pkg/entity"
@@ -140,10 +138,10 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 
 		cbs = []AnonymousErrorCallback{
 			func() (any, error) {
-				return typedInsertForeign(TransactionContext[HashCredentials](tctx), newForeignTable(cr, NewHashCredentialsTable))
+				return typedInsertForeign(TransactionContext[HashCredentials](tctx), NewConcurrentHashForeignTable(MaxElementsOfGoroutine, cr, NewHashCredentialsTable))
 			},
 			func() (any, error) {
-				return typedInsertForeign(TransactionContext[HashUser](tctx), newForeignTable(us, NewHashUserTable))
+				return typedInsertForeign(TransactionContext[HashUser](tctx), NewConcurrentHashForeignTable(MaxElementsOfGoroutine, us, NewHashUserTable))
 			},
 			func() (any, error) {
 				return typedInsertForeign(TransactionContext[LeakBadActor](tctx), NewLeakBadActorTable(map[Leak][]BadActor{l: bas}))
@@ -450,51 +448,6 @@ func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User
 
 func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials | SubscriberAffected](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
 	return ctx.insertForeign(t)
-}
-
-func newForeignTable[F HashCredentials | HashUser, P Credentials | User](primaryElements []P, newForeignTableCallback func([]P) ForeignTable[F]) ForeignTable[F] {
-
-	ngoroutines := 1
-	nelements := len(primaryElements)
-
-	if nelements > MaxElementsOfGoroutine {
-		ngoroutines = int(math.Ceil(float64(nelements) / float64(MaxElementsOfGoroutine)))
-	}
-
-	resultChan := make(chan ForeignTable[F])
-
-	var wg sync.WaitGroup
-
-	wg.Add(ngoroutines)
-
-	for i := 0; i < ngoroutines; i++ {
-
-		init := i * MaxElementsOfGoroutine
-		end := (i + 1) * MaxElementsOfGoroutine
-		if end > nelements {
-			end = nelements
-		}
-
-		go func(lines []P) {
-
-			defer wg.Done()
-			resultChan <- newForeignTableCallback(lines)
-
-		}(primaryElements[init:end])
-	}
-
-	go func() {
-		wg.Wait()
-		close(resultChan)
-	}()
-
-	result := ForeignTable[F]{}
-
-	for r := range resultChan {
-		result.Records = append(result.Records, r.Records...)
-	}
-
-	return result
 }
 
 func returnOnCallbackError(cbs []AnonymousErrorCallback) ([]any, error) {

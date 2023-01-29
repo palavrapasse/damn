@@ -3,7 +3,9 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"strings"
+	"sync"
 
 	. "github.com/palavrapasse/damn/pkg/entity"
 	. "github.com/palavrapasse/damn/pkg/entity/query"
@@ -45,6 +47,11 @@ type DatabaseTable[R Record] struct {
 
 type PrimaryTable[R Record] DatabaseTable[R]
 type ForeignTable[R Record] DatabaseTable[R]
+
+type concurrentHashForeignTableResult[R Record] struct {
+	routineId        int
+	hashForeignTable ForeignTable[R]
+}
 
 func MultiplePlaceholder(lv int) string {
 	phs := make([]string, lv)
@@ -204,6 +211,54 @@ func NewSubscriberAffectedTable(s Subscriber, a []Affected) ForeignTable[Subscri
 	return ForeignTable[SubscriberAffected]{
 		Records: rs,
 	}
+}
+
+func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials | User](maxElementsOfGoroutine int, primaryElements []P, newForeignTableCallback func([]P) ForeignTable[F]) ForeignTable[F] {
+
+	ngoroutines := 1
+	nelements := len(primaryElements)
+
+	if nelements > maxElementsOfGoroutine {
+		ngoroutines = int(math.Ceil(float64(nelements) / float64(maxElementsOfGoroutine)))
+	}
+
+	resultChan := make(chan concurrentHashForeignTableResult[F])
+
+	var wg sync.WaitGroup
+
+	wg.Add(ngoroutines)
+
+	for i := 0; i < ngoroutines; i++ {
+
+		init := i * maxElementsOfGoroutine
+		end := (i + 1) * maxElementsOfGoroutine
+		if end > nelements {
+			end = nelements
+		}
+
+		go func(lines []P, routineId int) {
+
+			defer wg.Done()
+			resultChan <- concurrentHashForeignTableResult[F]{
+				routineId:        routineId,
+				hashForeignTable: newForeignTableCallback(lines),
+			}
+
+		}(primaryElements[init:end], i)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	result := ForeignTable[F]{}
+
+	for r := range resultChan {
+		result.Records = append(result.Records, r.hashForeignTable.Records...)
+	}
+
+	return result
 }
 
 func (pt PrimaryTable[R]) Name() string {
