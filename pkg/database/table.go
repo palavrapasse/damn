@@ -49,8 +49,13 @@ type PrimaryTable[R Record] DatabaseTable[R]
 type ForeignTable[R Record] DatabaseTable[R]
 
 type concurrentHashForeignTableResult[R Record] struct {
-	hashForeignTable ForeignTable[R]
 	routineId        int
+	hashForeignTable ForeignTable[R]
+}
+
+type concurrentPrimaryTableResult[R Record] struct {
+	routineId    int
+	primaryTable PrimaryTable[R]
 }
 
 func MultiplePlaceholder(lv int) string {
@@ -261,6 +266,63 @@ func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials |
 			if r.routineId == i {
 				result.Records = append(result.Records, r.hashForeignTable.Records...)
 				i++
+				break
+			}
+		}
+	}
+
+	return result
+}
+
+func NewConcurrentPrimaryTable[P BadActor | User | Credentials | Platform](maxElementsOfGoroutine int, primaryElements []P, newPrimaryTableCallback func([]P) PrimaryTable[P]) PrimaryTable[P] {
+
+	ngoroutines := 1
+	nelements := len(primaryElements)
+
+	if nelements > maxElementsOfGoroutine {
+		ngoroutines = int(math.Ceil(float64(nelements) / float64(maxElementsOfGoroutine)))
+	}
+
+	resultChan := make(chan concurrentPrimaryTableResult[P])
+
+	var wg sync.WaitGroup
+
+	wg.Add(ngoroutines)
+
+	for i := 0; i < ngoroutines; i++ {
+
+		init := i * maxElementsOfGoroutine
+		end := (i + 1) * maxElementsOfGoroutine
+		if end > nelements {
+			end = nelements
+		}
+
+		go func(lines []P, routineId int) {
+
+			defer wg.Done()
+			resultChan <- concurrentPrimaryTableResult[P]{
+				routineId:    routineId,
+				primaryTable: newPrimaryTableCallback(lines),
+			}
+
+		}(primaryElements[init:end], i)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	result := PrimaryTable[P]{}
+	i := 0
+
+	for i < ngoroutines {
+		for r := range resultChan {
+
+			if r.routineId == i {
+				result.Records = append(result.Records, r.primaryTable.Records...)
+				i++
+				break
 			}
 		}
 	}
