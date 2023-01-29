@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"math"
 	"reflect"
 	"sync"
@@ -22,7 +23,7 @@ const (
 	errorMessageRollbackTransaction = "could not rollback transaction: %w"
 )
 
-const MaxElementsOfGoroutine = 5000
+const MaxElementsOfGoroutine = 50000
 
 type DatabaseContext[R Record] struct {
 	DB       *sql.DB
@@ -467,6 +468,10 @@ func newForeignTable[F HashCredentials | HashUser, P Credentials | User](primary
 
 	wg.Add(ngoroutines)
 
+	log.Printf("goroutines spawned: %d", ngoroutines)
+
+	a := 0
+
 	for i := 0; i < ngoroutines; i++ {
 
 		init := i * MaxElementsOfGoroutine
@@ -479,6 +484,8 @@ func newForeignTable[F HashCredentials | HashUser, P Credentials | User](primary
 
 			defer wg.Done()
 			resultChan <- newForeignTableCallback(lines)
+			a++
+			log.Printf("done %d", a)
 
 		}(primaryElements[init:end])
 	}
