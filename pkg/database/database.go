@@ -20,6 +20,8 @@ const (
 	errorMessageRollbackTransaction = "could not rollback transaction: %w"
 )
 
+const MaxElementsOfGoroutine = 5000
+
 type DatabaseContext[R Record] struct {
 	DB       *sql.DB
 	FilePath string
@@ -136,10 +138,10 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 
 		cbs = []AnonymousErrorCallback{
 			func() (any, error) {
-				return typedInsertForeign(TransactionContext[HashCredentials](tctx), NewHashCredentialsTable(cr))
+				return typedInsertForeign(TransactionContext[HashCredentials](tctx), NewConcurrentHashForeignTable(MaxElementsOfGoroutine, cr, NewHashCredentialsTable))
 			},
 			func() (any, error) {
-				return typedInsertForeign(TransactionContext[HashUser](tctx), NewHashUserTable(us))
+				return typedInsertForeign(TransactionContext[HashUser](tctx), NewConcurrentHashForeignTable(MaxElementsOfGoroutine, us, NewHashUserTable))
 			},
 			func() (any, error) {
 				return typedInsertForeign(TransactionContext[LeakBadActor](tctx), NewLeakBadActorTable(map[Leak][]BadActor{l: bas}))

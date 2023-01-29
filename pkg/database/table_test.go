@@ -410,3 +410,27 @@ func TestPrimaryTableFieldsReturnsAllTableFieldsNames(t *testing.T) {
 		t.Fatalf("Fields should have returned all field names, but got: %v", fields)
 	}
 }
+
+func TestNewConcurrentHashForeignTableWithoutGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
+	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass3word")}}
+
+	expected := NewHashCredentialsTable(tb)
+
+	result := NewConcurrentHashForeignTable(len(tb), tb, NewHashCredentialsTable)
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("NewConcurrentHashForeignTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
+	}
+}
+
+func TestNewConcurrentHashForeignTableWithGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
+	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass4word")}, {Password: Password("pass5word")}}
+
+	expected := NewHashCredentialsTable(tb)
+
+	result := NewConcurrentHashForeignTable(len(tb)-2, tb, NewHashCredentialsTable)
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("NewConcurrentHashForeignTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
+	}
+}
