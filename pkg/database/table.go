@@ -49,13 +49,13 @@ type PrimaryTable[R Record] DatabaseTable[R]
 type ForeignTable[R Record] DatabaseTable[R]
 
 type concurrentHashForeignTableResult[R Record] struct {
-	routineId        int
 	hashForeignTable ForeignTable[R]
+	routineId        int
 }
 
 type concurrentPrimaryTableResult[R Record] struct {
-	routineId    int
 	primaryTable PrimaryTable[R]
+	routineId    int
 }
 
 func MultiplePlaceholder(lv int) string {
