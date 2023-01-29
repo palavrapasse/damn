@@ -253,9 +253,16 @@ func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials |
 	}()
 
 	result := ForeignTable[F]{}
+	i := 0
 
-	for r := range resultChan {
-		result.Records = append(result.Records, r.hashForeignTable.Records...)
+	for i < ngoroutines {
+		for r := range resultChan {
+
+			if r.routineId == i {
+				result.Records = append(result.Records, r.hashForeignTable.Records...)
+				i++
+			}
+		}
 	}
 
 	return result
