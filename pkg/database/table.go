@@ -257,18 +257,16 @@ func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials |
 		close(resultChan)
 	}()
 
+	mapResult := make(map[int]concurrentHashForeignTableResult[F])
+
+	for r := range resultChan {
+		mapResult[r.routineId] = r
+	}
+
 	result := ForeignTable[F]{}
-	i := 0
 
-	for i < ngoroutines {
-		for r := range resultChan {
-
-			if r.routineId == i {
-				result.Records = append(result.Records, r.hashForeignTable.Records...)
-				i++
-				break
-			}
-		}
+	for i := 0; i < ngoroutines; i++ {
+		result.Records = append(result.Records, mapResult[i].hashForeignTable.Records...)
 	}
 
 	return result
@@ -313,18 +311,16 @@ func NewConcurrentPrimaryTable[P BadActor | User | Credentials | Platform](maxEl
 		close(resultChan)
 	}()
 
+	mapResult := make(map[int]concurrentPrimaryTableResult[P])
+
+	for r := range resultChan {
+		mapResult[r.routineId] = r
+	}
+
 	result := PrimaryTable[P]{}
-	i := 0
 
-	for i < ngoroutines {
-		for r := range resultChan {
-
-			if r.routineId == i {
-				result.Records = append(result.Records, r.primaryTable.Records...)
-				i++
-				break
-			}
-		}
+	for i := 0; i < ngoroutines; i++ {
+		result.Records = append(result.Records, mapResult[i].primaryTable.Records...)
 	}
 
 	return result
