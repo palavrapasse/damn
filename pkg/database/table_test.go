@@ -434,3 +434,27 @@ func TestNewConcurrentHashForeignTableWithGoRoutinesReturnsTheSameAsNoRoutineFun
 		t.Fatalf("NewConcurrentHashForeignTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
 	}
 }
+
+func TestNewConcurrentPrimaryTableWithoutGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
+	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass3word")}}
+
+	expected := NewCredentialsTable(tb)
+
+	result := NewConcurrentPrimaryTable(len(tb), tb, NewCredentialsTable)
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("NewConcurrentPrimaryTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
+	}
+}
+
+func TestNewConcurrentPrimaryTableWithGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
+	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass4word")}, {Password: Password("pass5word")}}
+
+	expected := NewCredentialsTable(tb)
+
+	result := NewConcurrentPrimaryTable(len(tb)-2, tb, NewCredentialsTable)
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("NewConcurrentPrimaryTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
+	}
+}

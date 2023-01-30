@@ -98,19 +98,19 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 
 		cbs := []AnonymousErrorCallback{
 			func() (any, error) {
-				return typedInsertAndFindPrimary(TransactionContext[User](tctx), NewUserTable(us))
+				return typedInsertAndFindPrimary(TransactionContext[User](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, us, NewUserTable))
 			},
 			func() (any, error) {
-				return typedInsertAndFindPrimary(TransactionContext[Credentials](tctx), NewCredentialsTable(cr))
+				return typedInsertAndFindPrimary(TransactionContext[Credentials](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, cr, NewCredentialsTable))
 			},
 			func() (any, error) {
-				return typedInsertAndFindPrimary(TransactionContext[BadActor](tctx), NewBadActorTable(i.Leakers))
+				return typedInsertAndFindPrimary(TransactionContext[BadActor](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, i.Leakers, NewBadActorTable))
 			},
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[Leak](tctx), NewLeakTable(i.Leak))
 			},
 			func() (any, error) {
-				return typedInsertAndFindPrimary(TransactionContext[Platform](tctx), NewPlatformTable(i.AffectedPlatforms))
+				return typedInsertAndFindPrimary(TransactionContext[Platform](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, i.AffectedPlatforms, NewPlatformTable))
 			},
 		}
 

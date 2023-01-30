@@ -53,6 +53,11 @@ type concurrentHashForeignTableResult[R Record] struct {
 	routineId        int
 }
 
+type concurrentPrimaryTableResult[R Record] struct {
+	primaryTable PrimaryTable[R]
+	routineId    int
+}
+
 func MultiplePlaceholder(lv int) string {
 	phs := make([]string, lv)
 
@@ -252,17 +257,70 @@ func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials |
 		close(resultChan)
 	}()
 
+	mapResult := make(map[int]concurrentHashForeignTableResult[F])
+
+	for r := range resultChan {
+		mapResult[r.routineId] = r
+	}
+
 	result := ForeignTable[F]{}
-	i := 0
 
-	for i < ngoroutines {
-		for r := range resultChan {
+	for i := 0; i < ngoroutines; i++ {
+		result.Records = append(result.Records, mapResult[i].hashForeignTable.Records...)
+	}
 
-			if r.routineId == i {
-				result.Records = append(result.Records, r.hashForeignTable.Records...)
-				i++
-			}
+	return result
+}
+
+func NewConcurrentPrimaryTable[P BadActor | User | Credentials | Platform](maxElementsOfGoroutine int, primaryElements []P, newPrimaryTableCallback func([]P) PrimaryTable[P]) PrimaryTable[P] {
+
+	ngoroutines := 1
+	nelements := len(primaryElements)
+
+	if nelements > maxElementsOfGoroutine {
+		ngoroutines = int(math.Ceil(float64(nelements) / float64(maxElementsOfGoroutine)))
+	}
+
+	resultChan := make(chan concurrentPrimaryTableResult[P])
+
+	var wg sync.WaitGroup
+
+	wg.Add(ngoroutines)
+
+	for i := 0; i < ngoroutines; i++ {
+
+		init := i * maxElementsOfGoroutine
+		end := (i + 1) * maxElementsOfGoroutine
+		if end > nelements {
+			end = nelements
 		}
+
+		go func(lines []P, routineId int) {
+
+			defer wg.Done()
+			resultChan <- concurrentPrimaryTableResult[P]{
+				routineId:    routineId,
+				primaryTable: newPrimaryTableCallback(lines),
+			}
+
+		}(primaryElements[init:end], i)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	mapResult := make(map[int]concurrentPrimaryTableResult[P])
+
+	for r := range resultChan {
+		mapResult[r.routineId] = r
+	}
+
+	result := PrimaryTable[P]{}
+
+	for i := 0; i < ngoroutines; i++ {
+		result.Records = append(result.Records, mapResult[i].primaryTable.Records...)
 	}
 
 	return result
