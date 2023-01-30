@@ -438,7 +438,7 @@ func TestNewConcurrentHashForeignTableWithGoRoutinesReturnsTheSameAsNoRoutineFun
 func TestNewConcurrentPrimaryTableWithoutGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
 	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass3word")}}
 
-	expected := NewHashCredentialsTable(tb)
+	expected := NewCredentialsTable(tb)
 
 	result := NewConcurrentPrimaryTable(len(tb), tb, NewCredentialsTable)
 
@@ -450,7 +450,7 @@ func TestNewConcurrentPrimaryTableWithoutGoRoutinesReturnsTheSameAsNoRoutineFunc
 func TestNewConcurrentPrimaryTableWithGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
 	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass4word")}, {Password: Password("pass5word")}}
 
-	expected := NewHashCredentialsTable(tb)
+	expected := NewCredentialsTable(tb)
 
 	result := NewConcurrentPrimaryTable(len(tb)-2, tb, NewCredentialsTable)
 
