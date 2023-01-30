@@ -1,10 +1,6 @@
 package query
 
 import (
-	"errors"
-	"net/mail"
-	"strings"
-
 	"github.com/palavrapasse/damn/pkg/entity"
 )
 
@@ -13,26 +9,15 @@ const (
 	UserEmailField = "email"
 )
 
-type Email string
-
 type User struct {
 	Email  Email
 	UserId entity.AutoGenKey
 }
 
-func NewUser(email string) (User, error) {
-	var u User
-
-	emailTrim := strings.TrimSpace(email)
-	err := checkIfEmailConstraintsAreMet(emailTrim)
-
-	if err == nil {
-		u = User{
-			Email: Email(emailTrim),
-		}
+func NewUser(email Email) User {
+	return User{
+		Email: email,
 	}
-
-	return u, err
 }
 
 func (u User) Copy(key entity.AutoGenKey) User {
@@ -47,18 +32,4 @@ func (u User) Record() []entity.Tuple {
 		entity.NewTuple(UserIdField, u.UserId),
 		entity.NewTuple(UserEmailField, u.Email),
 	}
-}
-
-func checkIfEmailConstraintsAreMet(e string) error {
-	_, err := mail.ParseAddress(e)
-
-	if err != nil {
-		return err
-	}
-
-	if len(e) > 130 {
-		return errors.New("user email constraints are not met (max 130 characters)")
-	}
-
-	return nil
 }
