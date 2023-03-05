@@ -53,28 +53,6 @@ func TestBadActorTableNameReturnsBadActor(t *testing.T) {
 	}
 }
 
-func TestCredentialsTableNameReturnsCredentials(t *testing.T) {
-	tb := NewCredentialsTable([]Credentials{})
-	expectedTableName := "Credentials"
-
-	name := tb.Name()
-
-	if name != expectedTableName {
-		t.Fatalf("Credentials table name in database is %s, but Name() returned: %s", expectedTableName, name)
-	}
-}
-
-func TestHashCredentialsTableNameReturnsHashCredentials(t *testing.T) {
-	tb := NewHashCredentialsTable([]Credentials{})
-	expectedTableName := "HashCredentials"
-
-	name := tb.Name()
-
-	if name != expectedTableName {
-		t.Fatalf("HashCredentials table name in database is %s, but Name() returned: %s", expectedTableName, name)
-	}
-}
-
 func TestHashUserTableNameReturnsHashUser(t *testing.T) {
 	tb := NewHashUserTable([]User{})
 	expectedTableName := "HashUser"
@@ -94,17 +72,6 @@ func TestLeakBadActorTableNameReturnsLeakBadActor(t *testing.T) {
 
 	if name != expectedTableName {
 		t.Fatalf("LeakBadActor table name in database is %s, but Name() returned: %s", expectedTableName, name)
-	}
-}
-
-func TestLeakCredentialsTableNameReturnsLeakCredentials(t *testing.T) {
-	tb := NewLeakCredentialsTable(map[Leak][]Credentials{{}: {Credentials{}}})
-	expectedTableName := "LeakCredentials"
-
-	name := tb.Name()
-
-	if name != expectedTableName {
-		t.Fatalf("LeakCredentials table name in database is %s, but Name() returned: %s", expectedTableName, name)
 	}
 }
 
@@ -149,17 +116,6 @@ func TestPlatformTableNameReturnsPlatform(t *testing.T) {
 
 	if name != expectedTableName {
 		t.Fatalf("Platform table name in database is %s, but Name() returned: %s", expectedTableName, name)
-	}
-}
-
-func TestUserCredentialsTableNameReturnsUserCredentials(t *testing.T) {
-	tb := NewUserCredentialsTable(map[User]Credentials{{}: {}})
-	expectedTableName := "UserCredentials"
-
-	name := tb.Name()
-
-	if name != expectedTableName {
-		t.Fatalf("UserCredentials table name in database is %s, but Name() returned: %s", expectedTableName, name)
 	}
 }
 
@@ -284,30 +240,22 @@ func TestInsertValuesReturnsAllForeignTableValues(t *testing.T) {
 
 func TestTablePrepareInsertStatementReturnsSchemaInsertStatement(t *testing.T) {
 	bat := PrimaryTable[BadActor]{}.prepareInsertStatementString()
-	crt := PrimaryTable[Credentials]{}.prepareInsertStatementString()
-	hct := ForeignTable[HashCredentials]{}.prepareInsertStatementString()
 	hut := ForeignTable[HashUser]{}.prepareInsertStatementString()
 	lbat := ForeignTable[LeakBadActor]{}.prepareInsertStatementString()
-	lct := ForeignTable[LeakCredentials]{}.prepareInsertStatementString()
 	lpt := ForeignTable[LeakPlatform]{}.prepareInsertStatementString()
 	lt := PrimaryTable[Leak]{}.prepareInsertStatementString()
 	lut := ForeignTable[LeakUser]{}.prepareInsertStatementString()
 	pt := PrimaryTable[Platform]{}.prepareInsertStatementString()
-	uct := ForeignTable[UserCredentials]{}.prepareInsertStatementString()
 	ut := PrimaryTable[User]{}.prepareInsertStatementString()
 
 	tableInsertSchemaMapping := map[string]string{
 		bat:  "INSERT OR IGNORE INTO BadActor (identifier) VALUES (?)",
-		crt:  "INSERT OR IGNORE INTO Credentials (password) VALUES (?)",
-		hct:  "INSERT OR IGNORE INTO HashCredentials (credid, hsha256) VALUES (?, ?)",
 		hut:  "INSERT OR IGNORE INTO HashUser (userid, hsha256) VALUES (?, ?)",
 		lbat: "INSERT OR IGNORE INTO LeakBadActor (baid, leakid) VALUES (?, ?)",
-		lct:  "INSERT OR IGNORE INTO LeakCredentials (credid, leakid) VALUES (?, ?)",
 		lpt:  "INSERT OR IGNORE INTO LeakPlatform (platid, leakid) VALUES (?, ?)",
 		lt:   "INSERT OR IGNORE INTO Leak (sharedatesc, context) VALUES (?, ?)",
 		lut:  "INSERT OR IGNORE INTO LeakUser (userid, leakid) VALUES (?, ?)",
 		pt:   "INSERT OR IGNORE INTO Platform (name) VALUES (?)",
-		uct:  "INSERT OR IGNORE INTO UserCredentials (credid, userid) VALUES (?, ?)",
 		ut:   "INSERT OR IGNORE INTO User (email) VALUES (?)",
 	}
 
@@ -323,14 +271,12 @@ func TestTablePrepareInsertStatementReturnsSchemaInsertStatement(t *testing.T) {
 
 func TestTablePrepareFindStatementReturnsSchemaFindStatement(t *testing.T) {
 	bat := PrimaryTable[BadActor]{}.prepareFindStatementString()
-	crt := PrimaryTable[Credentials]{}.prepareFindStatementString()
 	lt := PrimaryTable[Leak]{}.prepareFindStatementString()
 	pt := PrimaryTable[Platform]{}.prepareFindStatementString()
 	ut := PrimaryTable[User]{}.prepareFindStatementString()
 
 	tableFindSchemaMapping := map[string]string{
 		bat: "SELECT * FROM BadActor WHERE (identifier) = (?) LIMIT 1",
-		crt: "SELECT * FROM Credentials WHERE (password) = (?) LIMIT 1",
 		lt:  "SELECT * FROM Leak WHERE (sharedatesc, context) = (?, ?) LIMIT 1",
 		pt:  "SELECT * FROM Platform WHERE (name) = (?) LIMIT 1",
 		ut:  "SELECT * FROM User WHERE (email) = (?) LIMIT 1",
@@ -408,53 +354,5 @@ func TestPrimaryTableFieldsReturnsAllTableFieldsNames(t *testing.T) {
 
 	if !reflect.DeepEqual(fields, expectedFields) {
 		t.Fatalf("Fields should have returned all field names, but got: %v", fields)
-	}
-}
-
-func TestNewConcurrentHashForeignTableWithoutGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
-	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass3word")}}
-
-	expected := NewHashCredentialsTable(tb)
-
-	result := NewConcurrentHashForeignTable(len(tb), tb, NewHashCredentialsTable)
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Fatalf("NewConcurrentHashForeignTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
-	}
-}
-
-func TestNewConcurrentHashForeignTableWithGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
-	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass4word")}, {Password: Password("pass5word")}}
-
-	expected := NewHashCredentialsTable(tb)
-
-	result := NewConcurrentHashForeignTable(len(tb)-2, tb, NewHashCredentialsTable)
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Fatalf("NewConcurrentHashForeignTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
-	}
-}
-
-func TestNewConcurrentPrimaryTableWithoutGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
-	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass3word")}}
-
-	expected := NewCredentialsTable(tb)
-
-	result := NewConcurrentPrimaryTable(len(tb), tb, NewCredentialsTable)
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Fatalf("NewConcurrentPrimaryTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
-	}
-}
-
-func TestNewConcurrentPrimaryTableWithGoRoutinesReturnsTheSameAsNoRoutineFunction(t *testing.T) {
-	tb := []Credentials{{Password: Password("pass1word")}, {Password: Password("pass2word")}, {Password: Password("pass3word")}, {Password: Password("pass4word")}, {Password: Password("pass5word")}}
-
-	expected := NewCredentialsTable(tb)
-
-	result := NewConcurrentPrimaryTable(len(tb)-2, tb, NewCredentialsTable)
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Fatalf("NewConcurrentPrimaryTable should have returned the same result and order as the function with no goroutines, but got: %v", result)
 	}
 }

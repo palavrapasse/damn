@@ -80,17 +80,7 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 	var leakId AutoGenKey
 
 	func() {
-		us := make([]User, len(i.AffectedUsers))
-		cr := make([]Credentials, len(i.AffectedUsers))
-
-		j := 0
-
-		for u, c := range i.AffectedUsers {
-			us[j] = u
-			cr[j] = c
-
-			j++
-		}
+		us := i.AffectedUsers
 
 		// Primary first
 
@@ -99,9 +89,6 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 		cbs := []AnonymousErrorCallback{
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[User](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, us, NewUserTable))
-			},
-			func() (any, error) {
-				return typedInsertAndFindPrimary(TransactionContext[Credentials](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, cr, NewCredentialsTable))
 			},
 			func() (any, error) {
 				return typedInsertAndFindPrimary(TransactionContext[BadActor](tctx), NewConcurrentPrimaryTable(MaxElementsOfGoroutine, i.Leakers, NewBadActorTable))
@@ -123,23 +110,14 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 		// Foreign now
 
 		us = pts[0].(PrimaryTable[User]).Records
-		cr = pts[1].(PrimaryTable[Credentials]).Records
-		bas := pts[2].(PrimaryTable[BadActor]).Records
-		ls := pts[3].(PrimaryTable[Leak]).Records
-		ps := pts[4].(PrimaryTable[Platform]).Records
+		bas := pts[1].(PrimaryTable[BadActor]).Records
+		ls := pts[2].(PrimaryTable[Leak]).Records
+		ps := pts[3].(PrimaryTable[Platform]).Records
 
 		l := ls[0]
 		leakId = l.LeakId
-		afu := map[User]Credentials{}
-
-		for k := range us {
-			afu[us[k]] = cr[k]
-		}
 
 		cbs = []AnonymousErrorCallback{
-			func() (any, error) {
-				return typedInsertForeign(TransactionContext[HashCredentials](tctx), NewConcurrentHashForeignTable(MaxElementsOfGoroutine, cr, NewHashCredentialsTable))
-			},
 			func() (any, error) {
 				return typedInsertForeign(TransactionContext[HashUser](tctx), NewConcurrentHashForeignTable(MaxElementsOfGoroutine, us, NewHashUserTable))
 			},
@@ -147,16 +125,10 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 				return typedInsertForeign(TransactionContext[LeakBadActor](tctx), NewLeakBadActorTable(map[Leak][]BadActor{l: bas}))
 			},
 			func() (any, error) {
-				return typedInsertForeign(TransactionContext[LeakCredentials](tctx), NewLeakCredentialsTable(map[Leak][]Credentials{l: cr}))
-			},
-			func() (any, error) {
 				return typedInsertForeign(TransactionContext[LeakPlatform](tctx), NewLeakPlatformTable(map[Leak][]Platform{l: ps}))
 			},
 			func() (any, error) {
 				return typedInsertForeign(TransactionContext[LeakUser](tctx), NewLeakUserTable(map[Leak][]User{l: us}))
-			},
-			func() (any, error) {
-				return typedInsertForeign(TransactionContext[UserCredentials](tctx), NewUserCredentialsTable(afu))
 			},
 		}
 
@@ -434,7 +406,7 @@ func (ctx TransactionContext[R]) insertForeign(t ForeignTable[R]) (ForeignTable[
 	return t.Copy(updatedRecords), err
 }
 
-func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User | Subscriber | Affected](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
+func typedInsertAndFindPrimary[R BadActor | Leak | Platform | User | Subscriber | Affected](ctx TransactionContext[R], t PrimaryTable[R]) (PrimaryTable[R], error) {
 	tctx := TransactionContext[R]{Tx: ctx.Tx}
 
 	tu, err := tctx.insertPrimary(t)
@@ -446,7 +418,7 @@ func typedInsertAndFindPrimary[R BadActor | Credentials | Leak | Platform | User
 	return tu, err
 }
 
-func typedInsertForeign[R HashCredentials | HashUser | LeakBadActor | LeakCredentials | LeakPlatform | LeakUser | UserCredentials | SubscriberAffected](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
+func typedInsertForeign[R HashUser | LeakBadActor | LeakPlatform | LeakUser | SubscriberAffected](ctx TransactionContext[R], t ForeignTable[R]) (ForeignTable[R], error) {
 	return ctx.insertForeign(t)
 }
 

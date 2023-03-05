@@ -74,12 +74,6 @@ func NewBadActorTable(ba []BadActor) PrimaryTable[BadActor] {
 	}
 }
 
-func NewCredentialsTable(cr []Credentials) PrimaryTable[Credentials] {
-	return PrimaryTable[Credentials]{
-		Records: cr,
-	}
-}
-
 func NewLeakTable(ls ...Leak) PrimaryTable[Leak] {
 	return PrimaryTable[Leak]{
 		Records: ls,
@@ -110,18 +104,6 @@ func NewAffectedTable(af []Affected) PrimaryTable[Affected] {
 	}
 }
 
-func NewHashCredentialsTable(cr []Credentials) ForeignTable[HashCredentials] {
-	rs := make(Records[HashCredentials], len(cr))
-
-	for i, v := range cr {
-		rs[i] = NewHashCredentials(v)
-	}
-
-	return ForeignTable[HashCredentials]{
-		Records: rs,
-	}
-}
-
 func NewHashUserTable(us []User) ForeignTable[HashUser] {
 	rs := make(Records[HashUser], len(us))
 
@@ -144,20 +126,6 @@ func NewLeakBadActorTable(lba map[Leak][]BadActor) ForeignTable[LeakBadActor] {
 	}
 
 	return ForeignTable[LeakBadActor]{
-		Records: rs,
-	}
-}
-
-func NewLeakCredentialsTable(lcr map[Leak][]Credentials) ForeignTable[LeakCredentials] {
-	rs := Records[LeakCredentials]{}
-
-	for l, crs := range lcr {
-		for _, cr := range crs {
-			rs = append(rs, NewLeakCredentials(cr, l))
-		}
-	}
-
-	return ForeignTable[LeakCredentials]{
 		Records: rs,
 	}
 }
@@ -190,22 +158,6 @@ func NewLeakUserTable(lus map[Leak][]User) ForeignTable[LeakUser] {
 	}
 }
 
-func NewUserCredentialsTable(uc map[User]Credentials) ForeignTable[UserCredentials] {
-	rs := make(Records[UserCredentials], len(uc))
-
-	i := 0
-
-	for u, c := range uc {
-		rs[i] = UserCredentials{CredId: c.CredId, UserId: u.UserId}
-
-		i++
-	}
-
-	return ForeignTable[UserCredentials]{
-		Records: rs,
-	}
-}
-
 func NewSubscriberAffectedTable(s Subscriber, a []Affected) ForeignTable[SubscriberAffected] {
 	rs := make(Records[SubscriberAffected], len(a))
 
@@ -218,7 +170,7 @@ func NewSubscriberAffectedTable(s Subscriber, a []Affected) ForeignTable[Subscri
 	}
 }
 
-func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials | User](maxElementsOfGoroutine int, primaryElements []P, newForeignTableCallback func([]P) ForeignTable[F]) ForeignTable[F] {
+func NewConcurrentHashForeignTable[F HashUser, P User](maxElementsOfGoroutine int, primaryElements []P, newForeignTableCallback func([]P) ForeignTable[F]) ForeignTable[F] {
 
 	ngoroutines := 1
 	nelements := len(primaryElements)
@@ -272,7 +224,7 @@ func NewConcurrentHashForeignTable[F HashCredentials | HashUser, P Credentials |
 	return result
 }
 
-func NewConcurrentPrimaryTable[P BadActor | User | Credentials | Platform](maxElementsOfGoroutine int, primaryElements []P, newPrimaryTableCallback func([]P) PrimaryTable[P]) PrimaryTable[P] {
+func NewConcurrentPrimaryTable[P BadActor | User | Platform](maxElementsOfGoroutine int, primaryElements []P, newPrimaryTableCallback func([]P) PrimaryTable[P]) PrimaryTable[P] {
 
 	ngoroutines := 1
 	nelements := len(primaryElements)
