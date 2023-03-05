@@ -1,3 +1,3 @@
 package query
 
-type LeakParse map[User]Credentials
+type LeakParse []User

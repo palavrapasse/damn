@@ -1,7 +1,7 @@
 package query
 
 type Import struct {
-	AffectedUsers     map[User]Credentials
+	AffectedUsers     []User
 	AffectedPlatforms []Platform
 	Leakers           []BadActor
 	Leak              Leak

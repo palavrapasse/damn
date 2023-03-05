@@ -240,30 +240,22 @@ func TestInsertValuesReturnsAllForeignTableValues(t *testing.T) {
 
 func TestTablePrepareInsertStatementReturnsSchemaInsertStatement(t *testing.T) {
 	bat := PrimaryTable[BadActor]{}.prepareInsertStatementString()
-	crt := PrimaryTable[Credentials]{}.prepareInsertStatementString()
-	hct := ForeignTable[HashCredentials]{}.prepareInsertStatementString()
 	hut := ForeignTable[HashUser]{}.prepareInsertStatementString()
 	lbat := ForeignTable[LeakBadActor]{}.prepareInsertStatementString()
-	lct := ForeignTable[LeakCredentials]{}.prepareInsertStatementString()
 	lpt := ForeignTable[LeakPlatform]{}.prepareInsertStatementString()
 	lt := PrimaryTable[Leak]{}.prepareInsertStatementString()
 	lut := ForeignTable[LeakUser]{}.prepareInsertStatementString()
 	pt := PrimaryTable[Platform]{}.prepareInsertStatementString()
-	uct := ForeignTable[UserCredentials]{}.prepareInsertStatementString()
 	ut := PrimaryTable[User]{}.prepareInsertStatementString()
 
 	tableInsertSchemaMapping := map[string]string{
 		bat:  "INSERT OR IGNORE INTO BadActor (identifier) VALUES (?)",
-		crt:  "INSERT OR IGNORE INTO Credentials (password) VALUES (?)",
-		hct:  "INSERT OR IGNORE INTO HashCredentials (credid, hsha256) VALUES (?, ?)",
 		hut:  "INSERT OR IGNORE INTO HashUser (userid, hsha256) VALUES (?, ?)",
 		lbat: "INSERT OR IGNORE INTO LeakBadActor (baid, leakid) VALUES (?, ?)",
-		lct:  "INSERT OR IGNORE INTO LeakCredentials (credid, leakid) VALUES (?, ?)",
 		lpt:  "INSERT OR IGNORE INTO LeakPlatform (platid, leakid) VALUES (?, ?)",
 		lt:   "INSERT OR IGNORE INTO Leak (sharedatesc, context) VALUES (?, ?)",
 		lut:  "INSERT OR IGNORE INTO LeakUser (userid, leakid) VALUES (?, ?)",
 		pt:   "INSERT OR IGNORE INTO Platform (name) VALUES (?)",
-		uct:  "INSERT OR IGNORE INTO UserCredentials (credid, userid) VALUES (?, ?)",
 		ut:   "INSERT OR IGNORE INTO User (email) VALUES (?)",
 	}
 
@@ -279,14 +271,12 @@ func TestTablePrepareInsertStatementReturnsSchemaInsertStatement(t *testing.T) {
 
 func TestTablePrepareFindStatementReturnsSchemaFindStatement(t *testing.T) {
 	bat := PrimaryTable[BadActor]{}.prepareFindStatementString()
-	crt := PrimaryTable[Credentials]{}.prepareFindStatementString()
 	lt := PrimaryTable[Leak]{}.prepareFindStatementString()
 	pt := PrimaryTable[Platform]{}.prepareFindStatementString()
 	ut := PrimaryTable[User]{}.prepareFindStatementString()
 
 	tableFindSchemaMapping := map[string]string{
 		bat: "SELECT * FROM BadActor WHERE (identifier) = (?) LIMIT 1",
-		crt: "SELECT * FROM Credentials WHERE (password) = (?) LIMIT 1",
 		lt:  "SELECT * FROM Leak WHERE (sharedatesc, context) = (?, ?) LIMIT 1",
 		pt:  "SELECT * FROM Platform WHERE (name) = (?) LIMIT 1",
 		ut:  "SELECT * FROM User WHERE (email) = (?) LIMIT 1",

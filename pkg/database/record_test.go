@@ -21,30 +21,6 @@ func TestValuesReturnsSchemaValuesIfRecordIsBadActor(t *testing.T) {
 	}
 }
 
-func TestValuesReturnsSchemaValuesIfRecordIsCredentials(t *testing.T) {
-	r := Credentials{CredId: 1, Password: "my.password"}
-
-	expectedValues := []any{r.CredId, r.Password}
-
-	values := Values(r)
-
-	if !reflect.DeepEqual(values, expectedValues) {
-		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
-	}
-}
-
-func TestValuesReturnsSchemaValuesIfRecordIsHashCredentials(t *testing.T) {
-	r := HashCredentials{CredId: 1, HSHA256: entity.NewHSHA256("my.password")}
-
-	expectedValues := []any{r.CredId, r.HSHA256}
-
-	values := Values(r)
-
-	if !reflect.DeepEqual(values, expectedValues) {
-		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
-	}
-}
-
 func TestValuesReturnsSchemaValuesIfRecordIsHashUser(t *testing.T) {
 	r := HashUser{UserId: 1, HSHA256: entity.NewHSHA256("my.email@gmail.com")}
 
@@ -61,18 +37,6 @@ func TestValuesReturnsSchemaValuesIfRecordIsLeakBadActor(t *testing.T) {
 	r := LeakBadActor{BaId: 1, LeakId: 2}
 
 	expectedValues := []any{r.BaId, r.LeakId}
-
-	values := Values(r)
-
-	if !reflect.DeepEqual(values, expectedValues) {
-		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
-	}
-}
-
-func TestValuesReturnsSchemaValuesIfRecordIsLeakCredentials(t *testing.T) {
-	r := LeakCredentials{CredId: 1, LeakId: 2}
-
-	expectedValues := []any{r.CredId, r.LeakId}
 
 	values := Values(r)
 
@@ -121,18 +85,6 @@ func TestValuesReturnsSchemaValuesIfRecordIsPlatform(t *testing.T) {
 	r := Platform{PlatId: 1, Name: "twitter"}
 
 	expectedValues := []any{r.PlatId, r.Name}
-
-	values := Values(r)
-
-	if !reflect.DeepEqual(values, expectedValues) {
-		t.Fatalf("Values should have return slice with values as defined in schema, but got: %v", values)
-	}
-}
-
-func TestValuesReturnsSchemaValuesIfRecordIsUserCredentials(t *testing.T) {
-	r := UserCredentials{CredId: 1, UserId: 2}
-
-	expectedValues := []any{r.CredId, r.UserId}
 
 	values := Values(r)
 
@@ -201,18 +153,6 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsBadActor(t *testi
 	}
 }
 
-func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsCredentials(t *testing.T) {
-	r := Credentials{}
-	k := entity.AutoGenKey(500)
-	expectedRecord := r.Copy(k)
-
-	copyRecord := CopyWithNewKey(r, k)
-
-	if copyRecord != expectedRecord {
-		t.Fatalf("CopyWithNewKey should have set auto gen key via Copy method, but match failed: %v\n", copyRecord)
-	}
-}
-
 func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsLeak(t *testing.T) {
 	r := Leak{}
 	k := entity.AutoGenKey(500)
@@ -270,17 +210,5 @@ func TestCopyWithNewKeyReturnsRecordWithAutoGenKeySetIfRecordIsAffected(t *testi
 
 	if copyRecord != expectedRecord {
 		t.Fatalf("CopyWithNewKey should have set auto gen key via Copy method, but match failed: %v\n", copyRecord)
-	}
-}
-
-func TestCopyWithNewKeyReturnsSameRecordIfRecordIsNotPrimary(t *testing.T) {
-	r := LeakCredentials{}
-	k := entity.AutoGenKey(500)
-	expectedRecord := r
-
-	copyRecord := CopyWithNewKey(r, k)
-
-	if copyRecord != expectedRecord {
-		t.Fatalf("CopyWithNewKey should have not set auto gen key via Copy method, but match failed: %v\n", copyRecord)
 	}
 }

@@ -80,15 +80,7 @@ func (ctx DatabaseContext[Record]) Insert(i Import) (AutoGenKey, error) {
 	var leakId AutoGenKey
 
 	func() {
-		us := make([]User, len(i.AffectedUsers))
-
-		j := 0
-
-		for u := range i.AffectedUsers {
-			us[j] = u
-
-			j++
-		}
+		us := i.AffectedUsers
 
 		// Primary first
 
